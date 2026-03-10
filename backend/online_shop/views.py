@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from .forms import PostsForm
 
 # Create your views here.
 
@@ -9,4 +10,13 @@ def home(request):
 
 
 def about(request):
-    return render(request, "about.html")    
+    return render(request, "about.html")   
+
+def posts(request):
+    return render(request, "posts.html")
+
+def create_post(request):
+    context = {
+         "form": PostsForm() 
+    }
+    return render(request, "create_post.html", context) 

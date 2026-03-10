@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+  <style>
+    .posts-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 28px;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .posts-hero h1 {
+      font-size: clamp(2.2rem, 3.8vw, 3rem);
+      margin-bottom: 10px;
+    }
+
+    .posts-hero p {
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      box-shadow: 0 16px 28px rgba(14, 165, 233, 0.25);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 32px rgba(14, 165, 233, 0.3);
+      outline: none;
+    }
+
+    .btn-ghost {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.75);
+      border-color: rgba(15, 23, 42, 0.12);
+    }
+
+    .btn-ghost:hover,
+    .btn-ghost:focus-visible {
+      transform: translateY(-1px);
+      outline: none;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .hero-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .hero-card h3 {
+      margin-bottom: 6px;
+      font-size: 1.1rem;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      padding: 12px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 20px;
+    }
+
+    .search-field {
+      flex: 1 1 260px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .search-field input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      font-size: 0.98rem;
+      outline: none;
+      color: var(--text);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .post-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.12);
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .post-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .post-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .post-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .post-footer a {
+      text-decoration: none;
+      color: #0ea5e9;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .empty-state {
+      padding: 32px;
+      border-radius: 20px;
+      border: 1px dashed rgba(15, 23, 42, 0.2);
+      background: rgba(255, 255, 255, 0.7);
+      text-align: center;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .posts-hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <section class="posts-hero">
+    <div>
+      <h1>Posts that feel alive.</h1>
+      <p>
+        Curate stories, updates, and product moments in one place. This space is built for
+        fast scanning, clear hierarchy, and beautiful focus.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="{% url 'create_post' %}">Create new post</a>
+        <a class="btn-ghost" href="{% url 'about' %}">Design guidelines</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h3>Publishing pulse</h3>
+      <p>Keep the feed tight, timely, and purposeful.</p>
+      <div class="hero-metrics">
+        <div class="metric">
+          <strong>{{ posts|length }}</strong>
+          Total posts
+        </div>
+        <div class="metric">
+          <strong>24h</strong>
+          Avg. response
+        </div>
+        <div class="metric">
+          <strong>3</strong>
+          Drafts ready
+        </div>
+        <div class="metric">
+          <strong>87%</strong>
+          Engagement
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <label class="search-field" aria-label="Search posts">
+      <span>Search</span>
+      <input type="text" placeholder="Find a post, author, or tag" />
+    </label>
+    <div class="filter-group">
+      <span class="filter-pill">All</span>
+      <span class="filter-pill">Announcements</span>
+      <span class="filter-pill">Product</span>
+      <span class="filter-pill">Community</span>
+    </div>
+  </div>
+
+  {% if posts %}
+    <section class="posts-grid">
+      {% for post in posts %}
+        <article class="post-card">
+          <div class="post-meta">
+            <span class="tag">Featured</span>
+            <span>Updated recently</span>
+          </div>
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body|truncatewords:22 }}</p>
+          <div class="post-footer">
+            <span class="post-meta">By {{ post.author|default:"Team" }}</span>
+            <a href="#">View details</a>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <div class="empty-state">
+      <h3>No posts yet</h3>
+      <p>Create the first post and set the tone for your community.</p>
+      <a class="btn-primary" href="{% url 'create_post' %}">Start writing</a>
+    </div>
+  {% endif %}
+{% endblock content %}
