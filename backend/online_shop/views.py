@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from .forms import PostsForm
+from .models import Posts
 
-# Create your views here.
 
 
 def home(request):
@@ -13,10 +13,43 @@ def about(request):
     return render(request, "about.html")   
 
 def posts(request):
-    return render(request, "posts.html")
+    posts = Posts.objects.all()
+    context = {
+        "posts": posts
+    }
+    return render(request, "posts.html", context)
 
 def create_post(request):
     context = {
          "form": PostsForm() 
     }
-    return render(request, "create_post.html", context) 
+    if request.method == "POST":
+        form = PostsForm(request.POST)
+        if form.is_valid():
+            form.save()
+        return redirect("posts")
+
+    return render(request, "create_post.html", context)
+
+
+
+def update_post(request, pk: int):
+    post = Posts.objects.get(id=pk)
+
+    context = {
+         "form": PostsForm(instance=post) 
+    }
+    if request.method == "POST":
+        form = PostsForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+        return redirect("posts")
+
+    return render(request, "update_post.html", context) 
+
+
+def delete_post(request, pk: int):
+    post = Posts.objects.get(id=pk)
+    if request.method == "POST":
+        post.delete()
+    return redirect("posts")

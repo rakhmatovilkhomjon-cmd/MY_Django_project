@@ -161,15 +161,15 @@
 
   <section class="create-layout">
     <div class="form-card">
-      <h1>Create a new post</h1>
-      <p>Share ideas with clarity. Draft with focus, preview fast, and publish with confidence.</p>
+      <h1>Update post</h1>
+      <p>Refine your draft, keep the best parts, and save the changes when it feels right.</p>
 
       <form class="post-form" method="POST">
         {% csrf_token %}
         {{ form.as_p }}
 
         <div class="form-actions">
-          <button class="btn-primary" type="submit">Publish post</button>
+          <button class="btn-primary" type="submit">Save changes</button>
           <a class="btn-ghost" href="{% url 'posts' %}">Cancel</a>
         </div>
       </form>
@@ -178,12 +178,12 @@
     </div>
 
     <aside class="tips-card">
-      <h3>Post craft checklist</h3>
+      <h3>Editing checklist</h3>
       <ul class="tips-list">
-        <li>Lead with a clear promise in the first sentence.</li>
-        <li>Break long paragraphs into 2-3 lines for scanability.</li>
-        <li>Use a single focus tag that matches your audience intent.</li>
-        <li>End with a specific call-to-action or next step.</li>
+        <li>Clarify the opening so it matches the post's main point.</li>
+        <li>Trim repeated ideas or filler sentences.</li>
+        <li>Check headings and spacing for easy scanning.</li>
+        <li>End with a clear takeaway or next step.</li>
       </ul>
     </aside>
   </section>
