@@ -1,6 +1,11 @@
 from django.shortcuts import redirect, render
-from .forms import PostsForm
-from .models import Posts
+from .forms import (
+    
+    
+    PostsForm,
+    
+)
+from .models import  Posts
 
 
 
@@ -53,3 +58,5 @@ def delete_post(request, pk: int):
     if request.method == "POST":
         post.delete()
     return redirect("posts")
+
+
