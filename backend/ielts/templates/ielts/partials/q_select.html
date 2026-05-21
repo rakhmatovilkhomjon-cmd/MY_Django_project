@@ -1,0 +1,6 @@
+<select name="q_{{ question.id }}" class="form-select form-select-sm" style="max-width: 28rem">
+  <option value="">— Select —</option>
+  {% for opt in question.choices %}
+    <option value="{{ opt }}">{{ opt }}</option>
+  {% endfor %}
+</select>

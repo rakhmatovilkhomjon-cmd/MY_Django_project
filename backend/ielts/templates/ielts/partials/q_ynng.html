@@ -1,0 +1,8 @@
+<div class="d-flex flex-wrap gap-3 ps-1">
+  {% for opt in question.choices %}
+    <label class="d-flex align-items-center gap-2 cursor-pointer">
+      <input type="radio" name="q_{{ question.id }}" value="{{ opt }}" class="form-check-input mt-0">
+      <span>{{ opt }}</span>
+    </label>
+  {% endfor %}
+</div>

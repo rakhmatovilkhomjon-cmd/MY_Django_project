@@ -1,0 +1,60 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Exam results{% endblock %}
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold mb-1">Full test results</h1>
+      <p class="text-muted mb-0">{{ attempt.exam.title }}</p>
+    </div>
+    <div class="text-end">
+      <div class="display-5 fw-bold text-brand">{{ attempt.score }}</div>
+      <div class="small text-muted">correct out of {{ total_questions }}</div>
+      {% if reading_band %}
+        <div class="mt-1"><span class="badge rounded-pill" style="background:var(--brand-1);color:#fff">≈ Band {{ reading_band }}</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if type_breakdown %}
+  <div class="card-modern mb-4">
+    <h6 class="fw-bold mb-3">By question type</h6>
+    <div class="d-flex flex-wrap gap-2">
+      {% for row in type_breakdown %}
+        <span class="badge {% if row.accuracy >= 70 %}bg-success{% elif row.accuracy >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %} bg-opacity-75">
+          {{ row.label }}: {{ row.correct }}/{{ row.total }} ({{ row.accuracy }}%)
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card-modern p-0 overflow-hidden mb-4">
+    <div class="table-responsive mb-0">
+      <table class="table table-hover mb-0 small">
+        <thead class="table-light">
+          <tr>
+            <th>Passage</th>
+            <th>Question</th>
+            <th>Your answer</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in detail_rows %}
+            <tr class="{% if row.correct %}result-row-ok{% else %}result-row-miss{% endif %}">
+              <td class="text-muted">{{ row.passage }}</td>
+              <td>{{ row.question.text|truncatechars:80 }}</td>
+              <td>{{ row.given|default:"—" }}</td>
+              <td>{% if row.correct %}✓{% else %}✗{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'ielts:reading_exam' attempt.exam.id %}" class="btn btn-outline-primary">Retake this exam</a>
+    <a href="{% url 'ielts:reading_hub' %}" class="btn btn-secondary">Back to reading hub</a>
+  </div>
+{% endblock %}

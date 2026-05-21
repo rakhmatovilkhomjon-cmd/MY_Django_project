@@ -1,0 +1,72 @@
+{% load ielts_extras %}
+{% if task.visual.kind %}
+<div class="writing-visual-wrap mb-3" data-visual-kind="{{ task.visual.kind }}">
+  {% if task.visual.spec.title %}
+    <p class="writing-visual-title small fw-semibold text-muted mb-2">{{ task.visual.spec.title }}</p>
+  {% endif %}
+
+  {% if task.visual.kind == "line" or task.visual.kind == "bar" or task.visual.kind == "pie" %}
+    {% with chart_el_id="chart-spec-"|add:task.id|stringformat:"s" %}
+    <script type="application/json" id="{{ chart_el_id }}">{{ task.visual.spec|to_json }}</script>
+    <div class="writing-visual-chart">
+      <canvas
+        class="writing-chart-canvas"
+        id="writing-chart-{{ task.id }}{% if chart_suffix %}-{{ chart_suffix }}{% endif %}"
+        data-chart-kind="{{ task.visual.kind }}"
+        data-chart-script="{{ chart_el_id }}"
+        role="img"
+        aria-label="{{ task.visual.spec.title|default:'Chart for writing task' }}"
+      ></canvas>
+    </div>
+    {% endwith %}
+  {% elif task.visual.kind == "table" %}
+    <div class="table-responsive writing-visual-table-wrap">
+      <table class="table table-sm table-bordered writing-visual-table mb-0">
+        {% if task.visual.spec.headers %}
+        <thead><tr>{% for h in task.visual.spec.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        {% endif %}
+        <tbody>
+          {% for row in task.visual.spec.rows %}
+          <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif task.visual.kind == "process" %}
+    <div class="writing-visual-process" aria-label="{{ task.visual.spec.title|default:'Process diagram' }}">
+      <ol class="writing-process-steps list-unstyled d-flex flex-wrap gap-2 justify-content-center mb-0">
+        {% for step in task.visual.spec.steps %}
+          <li class="writing-process-step">
+            <span class="writing-process-num">{{ forloop.counter }}</span>
+            <span class="writing-process-label">{{ step.label }}</span>
+            {% if not forloop.last %}<span class="writing-process-arrow" aria-hidden="true">→</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  {% elif task.visual.kind == "map" %}
+    <div class="writing-visual-map row g-3">
+      {% for panel in task.visual.spec.panels %}
+        <div class="col-md-6">
+          <div class="writing-map-panel border rounded p-3 bg-light">
+            <div class="writing-map-panel-label fw-bold mb-2">{{ panel.label }}</div>
+            <ul class="small mb-2 ps-3">
+              {% for f in panel.features %}
+                <li>{{ f }}</li>
+              {% endfor %}
+            </ul>
+            <div class="writing-map-sketch" aria-hidden="true">
+              <svg viewBox="0 0 200 140" class="w-100" style="max-height:140px">
+                <rect x="10" y="10" width="180" height="120" fill="#f0f9ff" stroke="#0284c7" stroke-width="2" rx="4"/>
+                <path d="M30 80 L90 40 L150 70 L170 50" fill="none" stroke="#0369a1" stroke-width="2"/>
+                <circle cx="90" cy="40" r="6" fill="#0284c7"/>
+                <circle cx="150" cy="70" r="6" fill="#0ea5e9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endif %}

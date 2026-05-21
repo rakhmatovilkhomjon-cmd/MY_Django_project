@@ -1,0 +1,75 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Writing review — {{ task.title }}{% endblock %}
+{% block extra_head %}
+{% if task.visual.kind %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endif %}
+{% endblock %}
+{% block content %}
+  <p class="mb-3"><a href="{% url 'ielts:dashboard' %}" class="small text-decoration-none">← Dashboard</a></p>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card-modern">
+        <p class="small text-muted text-uppercase fw-semibold mb-1">Submitted response</p>
+        <h1 class="h4 fw-bold">{{ task.title }}</h1>
+        {% include 'ielts/partials/writing_visual.html' with task=task chart_suffix="review" %}
+        <p class="small text-muted">{{ task.prompt|truncatewords:40 }}</p>
+        <div class="d-flex gap-3 mt-3">
+          <div>
+            <div class="small text-muted">Words</div>
+            <div class="fw-bold {% if attempt.word_count < min_words %}text-danger{% else %}text-success{% endif %}">
+              {{ attempt.word_count }} / {{ min_words }}+
+            </div>
+          </div>
+          <div>
+            <div class="small text-muted">Submitted</div>
+            <div class="fw-bold small">{{ attempt.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card-modern mb-4">
+        <h5 class="fw-bold mb-3">Your text</h5>
+        <div class="writing-review-body border rounded p-3 bg-light small" style="white-space:pre-wrap; max-height:320px; overflow:auto">{{ attempt.content }}</div>
+      </div>
+      <div class="card-modern">
+        <h5 class="fw-bold mb-2">Self-assessment (IELTS criteria)</h5>
+        <p class="small text-muted mb-3">Rate your response 1–9 for each criterion. This is for your own tracking — not an official score.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Task Achievement / Response</label>
+              <input type="range" class="form-range" name="ta" min="1" max="9" value="{{ review.ta|default:6 }}">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Coherence & Cohesion</label>
+              <input type="range" class="form-range" name="cc" min="1" max="9" value="{{ review.cc|default:6 }}">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Lexical Resource</label>
+              <input type="range" class="form-range" name="lr" min="1" max="9" value="{{ review.lr|default:6 }}">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold">Grammar & Accuracy</label>
+              <input type="range" class="form-range" name="gra" min="1" max="9" value="{{ review.gra|default:6 }}">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Notes for next attempt</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="What will you improve next time?">{{ review.notes }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-cta">Save self-review</button>
+          <a href="{% url 'ielts:writing' task.id %}" class="btn btn-outline-secondary ms-2">Retry task</a>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block extra_js %}
+{% load static %}
+{% if task.visual.kind %}
+<script src="{% static 'ielts/js/writing_charts.js' %}"></script>
+{% endif %}
+{% endblock %}

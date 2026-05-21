@@ -1,0 +1,20 @@
+{# Inner prompt only — wrap with .exam-paper-card in parent. Expects: task, optional show_task_timer, id_prefix #}
+{% with p=id_prefix|default:"" %}
+  <p class="exam-paper-kicker mb-2">{{ task.get_task_kind_display }}</p>
+  <h2 class="h4 fw-bold mb-3 writing-prompt-title" style="font-family: var(--font-display), serif">{{ task.title }}</h2>
+  {% if task.scenario.recipient %}
+    <p class="small text-muted mb-2"><strong>To:</strong> {{ task.scenario.recipient }}{% if task.scenario.tone %} · <span class="text-capitalize">{{ task.scenario.tone }}</span>{% endif %}</p>
+  {% endif %}
+  {% include 'ielts/partials/writing_visual.html' with task=task chart_suffix=chart_suffix %}
+  <div class="exam-paper-body text-muted writing-prompt-body">{{ task.prompt|linebreaks }}</div>
+  {% if task.scenario.bullets %}
+    <ul class="scenario-bullets mt-3">
+      {% for b in task.scenario.bullets %}
+        <li>{{ b }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if show_task_timer %}
+    <p class="meta-muted small mt-3 mb-0"><strong>Time:</strong> <span id="{{ p }}time-limit">{{ task.time_limit_minutes }}</span> minutes · countdown starts automatically</p>
+  {% endif %}
+{% endwith %}

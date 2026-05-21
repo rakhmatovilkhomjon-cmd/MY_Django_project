@@ -1,0 +1,17 @@
+<div class="mb-4 question-block" id="block_q_{{ question.id }}">
+  <p class="fw-semibold mb-2"><span class="badge bg-light text-dark me-2">{{ label }}</span>{{ question.text }}</p>
+  {% if question.instruction %}
+    <p class="small text-muted mb-2">{{ question.instruction }}</p>
+  {% endif %}
+  {% if question.question_type == 'mcq' %}
+    {% include "ielts/partials/q_mcq.html" %}
+  {% elif question.question_type == 'ynng' or question.question_type == 'tfng' %}
+    {% include "ielts/partials/q_ynng.html" %}
+  {% elif question.question_type == 'headings' or question.question_type == 'matching_info' or question.question_type == 'match' or question.question_type == 'sentence_endings' %}
+    {% include "ielts/partials/q_select.html" %}
+  {% elif question.question_type == 'completion' or question.question_type == 'short_answer' %}
+    {% include "ielts/partials/q_text_gap.html" %}
+  {% else %}
+    {% include "ielts/partials/q_mcq.html" %}
+  {% endif %}
+</div>

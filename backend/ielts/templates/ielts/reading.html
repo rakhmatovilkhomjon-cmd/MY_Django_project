@@ -1,0 +1,77 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Reading — {{ passage.title }}{% endblock %}
+{% block extra_head %}
+  <meta name="robots" content="noindex">
+{% endblock %}
+{% block content %}
+  <div class="card-modern mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <h4 class="mb-0">{{ passage.title }}</h4>
+        <p class="meta-muted mb-0 small">Single passage · suggested pace {{ passage_timer_minutes }} minutes</p>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="meta-muted small">Timer</span>
+        <span class="fw-bold font-monospace reading-timer" id="passage-timer">--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <form method="post" id="reading-passage-form">
+    {% csrf_token %}
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card-modern reading-passage reading-passage-text">
+          {% if passage.source_note %}
+            <p class="small passage-source-note mb-3">{{ passage.source_note }}</p>
+          {% endif %}
+          {{ passage.content|linebreaks }}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-modern p-3 sticky-lg-top" style="top:1rem">
+          <div class="mb-3 d-flex flex-wrap gap-2 question-nav">
+            {% for q in questions %}
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-target="block_q_{{ q.id }}">{{ forloop.counter }}</button>
+            {% endfor %}
+          </div>
+          {% for q in questions %}
+            {% include "ielts/partials/question_field.html" with question=q label=forloop.counter %}
+          {% endfor %}
+          <div class="d-grid gap-2 mt-4">
+            <button type="submit" class="btn btn-cta btn-lg">Submit answers</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function(){
+  const minutes = {{ passage_timer_minutes|default:20 }};
+  let left = minutes * 60;
+  const el = document.getElementById('passage-timer');
+  const form = document.getElementById('reading-passage-form');
+  function fmt(s){
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const sec = (s%60).toString().padStart(2,'0');
+    return m+':'+sec;
+  }
+  el.textContent = fmt(left);
+  const t = setInterval(()=>{
+    left -= 1;
+    if(left < 0) left = 0;
+    el.textContent = fmt(left);
+    if(left <= 0){ clearInterval(t); form.requestSubmit(); }
+  }, 1000);
+  document.querySelectorAll('.question-nav button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.getAttribute('data-target');
+      const block = document.getElementById(id);
+      if(block) block.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+})();
+</script>
+{% endblock %}

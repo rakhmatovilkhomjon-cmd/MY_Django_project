@@ -1,0 +1,40 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Single Passages{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="landing-title mb-2">Single Passages</h1>
+      <p class="text-muted mb-0">Select a single academic passage to practice reading comprehension.</p>
+    </div>
+    <div>
+      <a href="{% url 'ielts:reading_hub' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back to Hub
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for passage in reading_passages %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm dash-suite-card">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ passage.title }}</h5>
+            <p class="card-text text-muted small mb-4">
+              {{ passage.content|truncatewords:20 }}
+            </p>
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span class="badge bg-light text-dark border"><i class="fas fa-list me-1"></i> {{ passage.questions.count }} questions</span>
+              <a href="{% url 'ielts:reading_passage' passage.id %}" class="btn btn-sm btn-primary">Practice</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info">No single passages are available at the moment.</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

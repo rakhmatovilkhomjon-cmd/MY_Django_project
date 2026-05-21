@@ -1,0 +1,8 @@
+<input
+  type="text"
+  name="q_{{ question.id }}"
+  class="form-control form-control-sm gap-input"
+  autocomplete="off"
+  placeholder="{% if question.word_limit %}Max {{ question.word_limit }} word{% if question.word_limit != 1 %}s{% endif %}{% else %}Your answer{% endif %}"
+  value=""
+>

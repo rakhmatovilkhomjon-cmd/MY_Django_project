@@ -1,0 +1,33 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Results{% endblock %}
+{% block content %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <h1 class="h3 fw-bold mb-0">Passage results</h1>
+    <span class="text-muted small">Single-passage attempt</span>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-7">
+      <div class="card-modern">
+        <h5 class="fw-bold">Latest writing submission</h5>
+        {% if writing_attempt %}
+          <pre class="mt-3 mb-0 small" style="white-space:pre-wrap; max-height: 20rem; overflow:auto">{{ writing_attempt.content }}</pre>
+        {% else %}
+          <p class="text-muted mb-0">No submitted writing yet.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card-modern text-center py-4 result-passage-card">
+        <h5 class="fw-bold">Reading score</h5>
+        <p class="display-4 fw-bold text-brand my-3">{{ reading_attempt.score }}</p>
+        <p class="text-muted small mb-0">{{ reading_attempt.passage.title }}</p>
+        <div class="d-grid gap-2 mt-4 px-2">
+          <a href="{% url 'ielts:reading_passage' reading_attempt.passage.id %}" class="btn btn-outline-primary">Retry this passage</a>
+          <a href="{% url 'ielts:reading_hub' %}" class="btn btn-secondary">Reading hub</a>
+          <a href="{% url 'ielts:dashboard' %}" class="btn btn-link btn-sm text-muted">Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

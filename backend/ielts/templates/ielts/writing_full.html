@@ -1,0 +1,436 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Full Writing Test — {{ paper.title }}{% endblock %}
+{% block extra_head %}
+<meta name="robots" content="noindex">
+<style>
+:root {
+  --exam-bg: #f0f7ff;
+  --exam-surface: #ffffff;
+  --exam-card: #ffffff;
+  --exam-border: rgba(14,165,233,0.15);
+  --exam-blue: #0284c7;
+  --exam-blue-glow: rgba(2,132,199,0.18);
+  --exam-green: #059669;
+  --exam-amber: #d97706;
+  --exam-red: #dc2626;
+  --exam-text: #0f172a;
+  --exam-muted: #475569;
+  --exam-dim: #64748b;
+}
+body { background: var(--exam-bg) !important; color: var(--exam-text) !important; }
+.site-header { background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(12px); border-bottom: 1px solid var(--exam-border) !important; }
+.site-header .brand-title, .site-header .nav-link { color: #0f172a !important; }
+.site-header .btn-outline-dark { color: #475569 !important; border-color: #cbd5e1 !important; }
+.site-footer { background: #ffffff !important; border-top: 1px solid var(--exam-border) !important; color: var(--exam-muted) !important; }
+.main-content { max-width: 100% !important; padding: 0 !important; }
+
+/* ── Header ── */
+.wf-header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--exam-border);
+  padding: 1rem 2rem;
+  transition: border-color .3s;
+}
+.wf-header.warn { border-bottom-color: var(--exam-amber); background: rgba(251,191,36,0.05); }
+.wf-header.crit { border-bottom-color: var(--exam-red); background: rgba(220,38,38,0.04); }
+
+.wf-kicker { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color: var(--exam-blue); margin-bottom:.2rem; }
+.wf-paper-title { font-weight:700; font-size:1rem; color: var(--exam-text); }
+
+/* Pill tabs */
+.wf-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:.5rem 1.25rem; border-radius:99px;
+  font-size:.82rem; font-weight:700; cursor:pointer;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: var(--exam-muted);
+  transition: all .25s; user-select:none;
+}
+.wf-pill:hover { border-color: #94a3b8; color: var(--exam-text); }
+.wf-pill.active { border-color: var(--exam-blue); background: #eff6ff; color: var(--exam-blue); box-shadow: 0 0 15px var(--exam-blue-glow); }
+
+/* Timer */
+.wf-timer-val { font-family:monospace; font-size:2rem; font-weight:800; color: var(--exam-text); line-height:1; letter-spacing:-.02em; }
+.wf-header.warn .wf-timer-val { color: var(--exam-amber); }
+.wf-header.crit .wf-timer-val { color: var(--exam-red); animation: blink 1s step-end infinite; }
+@keyframes blink { 50%{opacity:.4;} }
+.wf-timer-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.08em; color: var(--exam-muted); }
+.wf-progress-track { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:6px; width:100px; }
+.wf-progress-bar { height:100%; background: var(--exam-blue); border-radius:2px; transition: width .8s linear; }
+.wf-header.warn .wf-progress-bar { background: var(--exam-amber); }
+.wf-header.crit .wf-progress-bar { background: var(--exam-red); }
+
+/* ── Layout ── */
+.wf-body { display:grid; grid-template-columns: 380px 1fr; gap:0; min-height: calc(100vh - 70px); }
+@media(max-width:991px){ .wf-body { grid-template-columns:1fr; } }
+
+/* ── Sidebar (prompt) ── */
+.wf-sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  padding: 2rem 1.75rem;
+  display:flex; flex-direction:column; gap:1.5rem;
+  position: sticky; top: 71px; height: calc(100vh - 71px); overflow-y:auto;
+  box-shadow: 2px 0 12px rgba(15,23,42,0.04);
+}
+.wf-task-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:.3rem .75rem; border-radius:6px;
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em;
+  background: rgba(59,130,246,0.12); color: var(--exam-blue);
+  border: 1px solid rgba(59,130,246,0.25);
+}
+.wf-task-badge.t2 { background: #ecfdf5; color: var(--exam-green); border-color: #a7f3d0; }
+.wf-prompt-title { font-size:1.25rem; font-weight:700; color: #0f172a; line-height:1.35; }
+.wf-prompt-body { color: #334155; line-height:1.75; font-size:.95rem; }
+.wf-info-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:.78rem; color: var(--exam-dim); padding:.3rem .6rem;
+  background:#f1f5f9; border-radius:6px;
+  border:1px solid #e2e8f0;
+}
+.wf-nav-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:.65rem 1.2rem; border-radius:10px;
+  font-size:.88rem; font-weight:600;
+  border: 1.5px solid #bae6fd;
+  background: #eff6ff;
+  color: var(--exam-blue); cursor:pointer;
+  transition: all .2s; width:100%; justify-content:center;
+}
+.wf-nav-btn:hover { background: #dbeafe; border-color: var(--exam-blue); }
+.wf-autosave-chip { font-size:.72rem; color: var(--exam-dim); text-align:center; }
+
+/* ── Editor area ── */
+.wf-editor-area { padding:2rem; display:flex; flex-direction:column; gap:1.5rem; background: #f8fafc; }
+.wf-pane { display:none; flex-direction:column; gap:1.5rem; height:100%; }
+.wf-pane.active { display:flex; }
+
+.wf-editor-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius:16px; overflow:hidden;
+  transition: border-color .2s, box-shadow .2s;
+  flex:1;
+  box-shadow: 0 4px 16px rgba(15,23,42,0.05);
+}
+.wf-editor-wrap:focus-within {
+  border-color: var(--exam-blue);
+  box-shadow: 0 0 0 3px rgba(2,132,199,0.12), 0 10px 30px rgba(15,23,42,0.08);
+}
+.wf-editor-toolbar {
+  background: #f8fafc;
+  border-bottom:1px solid #e2e8f0;
+  padding:.6rem 1.25rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+}
+.wf-editor-toolbar-title { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color: var(--exam-dim); }
+.wf-word-badge {
+  font-size:.78rem; font-weight:600; padding:.2rem .6rem; border-radius:6px;
+  background: #f1f5f9; color: var(--exam-muted);
+  transition: all .3s;
+}
+.wf-word-badge.short { color: var(--exam-red); background: #fee2e2; }
+.wf-word-badge.ok { color: var(--exam-green); background: #d1fae5; }
+.wf-editor {
+  width:100%; min-height:480px; resize:none;
+  background:transparent; border:none; outline:none;
+  color: #0f172a; font-size:1.02rem; line-height:1.8;
+  padding:1.5rem; font-family: 'Georgia', serif;
+  caret-color: var(--exam-blue);
+}
+.wf-editor::placeholder { color: #94a3b8; font-style:italic; }
+
+/* ── FAB ── */
+#wf-fab {
+  position:fixed; bottom:2rem; right:2rem; z-index:999;
+  display:flex; align-items:center; gap:8px;
+  padding:.9rem 1.75rem; border-radius:50px;
+  background: linear-gradient(135deg,var(--exam-green),#059669);
+  color:#fff; font-weight:700; font-size:.95rem;
+  border:none; cursor:pointer;
+  box-shadow: 0 8px 30px rgba(16,185,129,0.4);
+  transition: all .25s;
+}
+#wf-fab:hover { transform:translateY(-3px); box-shadow:0 14px 40px rgba(16,185,129,0.5); }
+#wf-fab:disabled { opacity:.5; transform:none; cursor:not-allowed; }
+
+/* ── Modal ── */
+.wf-overlay {
+  position:fixed; inset:0; background:rgba(15,23,42,0.4); backdrop-filter:blur(6px);
+  z-index:1050; display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.wf-overlay.open { opacity:1; pointer-events:all; }
+.wf-modal {
+  background: #ffffff; border:1px solid #e2e8f0;
+  border-radius:20px; padding:2.25rem 2.5rem; max-width:440px; width:90%;
+  box-shadow:0 20px 60px rgba(15,23,42,0.15);
+  transform:scale(.95) translateY(10px); transition:transform .25s;
+}
+.wf-overlay.open .wf-modal { transform:scale(1) translateY(0); }
+.wf-modal h5 { font-size:1.2rem; font-weight:700; margin-bottom:.5rem; color: #0f172a; }
+.wf-modal p { color: #475569; font-size:.93rem; margin-bottom:1.75rem; }
+.wf-modal-check { display:flex; gap:.75rem; margin-bottom:1rem; padding:.75rem 1rem; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0; }
+.wf-modal-check .icon { font-size:1.1rem; }
+.wf-modal-check .lbl { font-size:.83rem; color: #64748b; }
+.wf-modal-check .val { font-size:.88rem; font-weight:600; }
+.wf-modal-check .val.ok { color: var(--exam-green); }
+.wf-modal-check .val.low { color: var(--exam-amber); }
+.btn-submit-confirm {
+  width:100%; padding:.85rem; border-radius:12px; border:none; cursor:pointer;
+  background: linear-gradient(135deg,var(--exam-green),#059669);
+  color:#fff; font-weight:700; font-size:1rem;
+  box-shadow:0 6px 20px rgba(16,185,129,0.35);
+  transition: all .2s;
+}
+.btn-submit-confirm:hover { transform:translateY(-2px); box-shadow:0 10px 30px rgba(16,185,129,0.45); }
+.btn-submit-confirm:disabled { opacity:.6; transform:none; cursor:not-allowed; }
+.btn-cancel-modal {
+  width:100%; padding:.75rem; border-radius:12px;
+  background:transparent; border:1px solid #e2e8f0;
+  color: #64748b; font-weight:600; cursor:pointer;
+  transition: all .2s; margin-top:.75rem;
+}
+.btn-cancel-modal:hover { border-color:#94a3b8; color: #0f172a; }
+</style>
+{% if paper.task_one.visual.kind %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="wf-header" id="wf-hdr">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <div class="wf-kicker">⚡ Full Writing Exam · {{ paper.time_limit_minutes }} min</div>
+      <div class="wf-paper-title">{{ paper.title }}</div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="wf-pill active" id="pill1" onclick="goTask(1)">
+        <span>📝</span> Task 1
+      </button>
+      <button class="wf-pill" id="pill2" onclick="goTask(2)">
+        <span>✍️</span> Task 2
+      </button>
+    </div>
+    <div class="text-end">
+      <div class="wf-timer-label">Time Remaining</div>
+      <div class="wf-timer-val" id="wf-time">--:--</div>
+      <div class="wf-progress-track">
+        <div class="wf-progress-bar" id="wf-bar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Body grid -->
+<div class="wf-body">
+
+  <!-- Sidebar: Task 1 -->
+  <aside class="wf-sidebar" id="side1">
+    <div>
+      <span class="wf-task-badge">Task 1 · Academic</span>
+    </div>
+    <div>
+      <div class="wf-prompt-title">{{ paper.task_one.title }}</div>
+    </div>
+    {% include 'ielts/partials/writing_visual.html' with task=paper.task_one chart_suffix="full" %}
+    <div class="wf-prompt-body">{{ paper.task_one.prompt|linebreaksbr }}</div>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="wf-info-chip">⏱ 20 min recommended</span>
+      <span class="wf-info-chip">📄 150+ words</span>
+    </div>
+    <button class="wf-nav-btn" onclick="goTask(2)">
+      Move to Task 2
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <div class="wf-autosave-chip" id="as1">Autosave active</div>
+  </aside>
+
+  <!-- Sidebar: Task 2 -->
+  <aside class="wf-sidebar" id="side2" style="display:none">
+    <div>
+      <span class="wf-task-badge t2">Task 2 · Essay</span>
+    </div>
+    <div>
+      <div class="wf-prompt-title">{{ paper.task_two.title }}</div>
+    </div>
+    <div class="wf-prompt-body">{{ paper.task_two.prompt|linebreaksbr }}</div>
+    <div class="d-flex flex-wrap gap-2">
+      <span class="wf-info-chip">⏱ 40 min recommended</span>
+      <span class="wf-info-chip">📄 250+ words</span>
+    </div>
+    <button class="wf-nav-btn" onclick="goTask(1)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Task 1
+    </button>
+    <div class="wf-autosave-chip" id="as2">Autosave active</div>
+  </aside>
+
+  <!-- Editor area -->
+  <div class="wf-editor-area">
+
+    <!-- Task 1 pane -->
+    <div class="wf-pane active" id="pane1">
+      <div class="wf-editor-wrap">
+        <div class="wf-editor-toolbar">
+          <span class="wf-editor-toolbar-title">📝 Task 1 Response</span>
+          <span class="wf-word-badge short" id="wb1">0 / 150+ words</span>
+        </div>
+        <textarea id="ed1" class="wf-editor" placeholder="Begin writing your Task 1 response here. Describe and summarise the key features of the data…">{{ editor_content_one }}</textarea>
+      </div>
+      <div style="font-size:.78rem;color:var(--exam-muted);text-align:right;">Characters: <span id="cc1">0</span></div>
+    </div>
+
+    <!-- Task 2 pane -->
+    <div class="wf-pane" id="pane2">
+      <div class="wf-editor-wrap">
+        <div class="wf-editor-toolbar">
+          <span class="wf-editor-toolbar-title">✍️ Task 2 Response</span>
+          <span class="wf-word-badge short" id="wb2">0 / 250+ words</span>
+        </div>
+        <textarea id="ed2" class="wf-editor" placeholder="Begin writing your Task 2 essay here. Introduce your argument clearly and develop it with relevant examples…">{{ editor_content_two }}</textarea>
+      </div>
+      <div style="font-size:.78rem;color:var(--exam-muted);text-align:right;">Characters: <span id="cc2">0</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Floating submit -->
+<button id="wf-fab" onclick="openModal()">
+  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  Submit Full Test
+</button>
+
+<!-- Confirm Modal -->
+<div class="wf-overlay" id="wf-overlay">
+  <div class="wf-modal">
+    <h5>Submit your full writing test?</h5>
+    <p>Both tasks will be saved and the exam will end. This action cannot be undone.</p>
+    <div class="wf-modal-check">
+      <span class="icon">📝</span>
+      <div>
+        <div class="lbl">Task 1 word count</div>
+        <div class="val" id="m-wc1">—</div>
+      </div>
+    </div>
+    <div class="wf-modal-check">
+      <span class="icon">✍️</span>
+      <div>
+        <div class="lbl">Task 2 word count</div>
+        <div class="val" id="m-wc2">—</div>
+      </div>
+    </div>
+    <button class="btn-submit-confirm" id="wf-confirm-btn" onclick="doSubmit()">
+      ✓ Confirm & Submit
+    </button>
+    <button class="btn-cancel-modal" onclick="closeModal()">Cancel — keep writing</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+{% if paper.task_one.visual.kind %}
+<script src="{% static 'ielts/js/writing_charts.js' %}"></script>
+{% endif %}
+<script>
+(function(){
+  const totalSec = {{ paper.time_limit_minutes }} * 60;
+  let timeLeft = {{ remaining_seconds }};
+  const submitUrl = "{{ submit_full_url|escapejs }}";
+  const t1id = {{ paper.task_one.id }}, t2id = {{ paper.task_two.id }};
+  const autosaveUrl = "{% url 'ielts:autosave_writing' %}";
+
+  const hdr=document.getElementById('wf-hdr'), timeEl=document.getElementById('wf-time'), barEl=document.getElementById('wf-bar');
+  const ed1=document.getElementById('ed1'), ed2=document.getElementById('ed2');
+  const wb1=document.getElementById('wb1'), wb2=document.getElementById('wb2');
+  const cc1=document.getElementById('cc1'), cc2=document.getElementById('cc2');
+  const fab=document.getElementById('wf-fab');
+  let timedOut=false;
+
+  // Task switching
+  window.goTask = function(n){
+    ['pane1','pane2'].forEach((id,i)=>{ document.getElementById(id).classList.toggle('active',i+1===n); });
+    ['side1','side2'].forEach((id,i)=>{ document.getElementById(id).style.display=i+1===n?'flex':'none'; });
+    ['pill1','pill2'].forEach((id,i)=>{ document.getElementById(id).classList.toggle('active',i+1===n); });
+  };
+
+  // Counts
+  function wc(t){ return t.trim().length?t.trim().split(/\s+/).length:0; }
+  function updateCounts(){
+    const w1=wc(ed1.value), w2=wc(ed2.value);
+    wb1.textContent=w1+' / 150+ words'; wb1.className='wf-word-badge '+(w1>=150?'ok':'short');
+    wb2.textContent=w2+' / 250+ words'; wb2.className='wf-word-badge '+(w2>=250?'ok':'short');
+    cc1.textContent=ed1.value.length; cc2.textContent=ed2.value.length;
+  }
+  ed1.addEventListener('input',debounce(updateCounts,250));
+  ed2.addEventListener('input',debounce(updateCounts,250));
+  updateCounts();
+
+  // Timer
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  timeEl.textContent=fmt(timeLeft);
+  const tick=setInterval(()=>{
+    timeLeft=Math.max(0,timeLeft-1);
+    timeEl.textContent=fmt(timeLeft);
+    const pct=Math.min(100,Math.round(((totalSec-timeLeft)/totalSec)*100));
+    barEl.style.width=pct+'%';
+    hdr.classList.toggle('warn',timeLeft<=300&&timeLeft>60);
+    hdr.classList.toggle('crit',timeLeft<=60);
+    if(timeLeft<=0){ clearInterval(tick); onTimeout(); }
+  },1000);
+
+  function onTimeout(){
+    if(timedOut)return; timedOut=true; fab.disabled=true;
+    postBoth('timeout').then(handleResp);
+  }
+
+  // Autosave
+  function save(tid,content,statusEl){
+    fetchWithCsrf(autosaveUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:tid,content})})
+      .then(r=>r.json()).then(d=>{ if(d.ok) statusEl.textContent='Saved '+new Date(d.saved_at).toLocaleTimeString(); }).catch(()=>{});
+  }
+  setInterval(()=>{
+    save(t1id,ed1.value,document.getElementById('as1'));
+    save(t2id,ed2.value,document.getElementById('as2'));
+  },5000);
+
+  // Submit
+  function postBoth(action){
+    const b=new URLSearchParams();
+    b.set('action',action); b.set('content_task1',ed1.value); b.set('content_task2',ed2.value);
+    return fetchWithCsrf(submitUrl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b.toString()})
+      .then(r=>r.json().then(d=>({ok:r.ok,d})).catch(()=>({ok:false,d:{error:'parse_error'}})));
+  }
+  function handleResp(res){
+    const btn=document.getElementById('wf-confirm-btn');
+    btn.disabled=false; btn.textContent='✓ Confirm & Submit';
+    if(!res.ok||!res.d||!res.d.ok){ closeModal(); alert('Submission failed: '+(res.d?.error||'unknown')); return; }
+    if(res.d.redirect) window.location.href=res.d.redirect;
+  }
+
+  window.openModal=function(){
+    if(timedOut)return;
+    const w1=wc(ed1.value), w2=wc(ed2.value);
+    const m1=document.getElementById('m-wc1'), m2=document.getElementById('m-wc2');
+    m1.textContent=w1+' words'; m1.className='val '+(w1>=150?'ok':'low');
+    m2.textContent=w2+' words'; m2.className='val '+(w2>=250?'ok':'low');
+    document.getElementById('wf-overlay').classList.add('open');
+  };
+  window.closeModal=function(){ document.getElementById('wf-overlay').classList.remove('open'); };
+  window.doSubmit=function(){
+    const btn=document.getElementById('wf-confirm-btn');
+    btn.disabled=true; btn.textContent='Submitting…';
+    postBoth('finish_all').then(handleResp);
+  };
+  document.getElementById('wf-overlay').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
+})();
+</script>
+{% endblock %}

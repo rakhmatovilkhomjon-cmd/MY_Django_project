@@ -1,0 +1,145 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <div class="dash-welcome mb-4">
+    <p class="small text-white-50 mb-1">Signed in as {{ user.username }}</p>
+    <h1 class="h3 fw-bold mb-2">Your practice hub</h1>
+    <p class="mb-0 text-white-50 small">Track full tests, single passages, and writing — pick up where you left off.</p>
+  </div>
+
+  {% if focus.reading or focus.writing %}
+  <div class="alert alert-info border mb-4">
+    <div class="fw-bold mb-2">Focus next</div>
+    <ul class="mb-0 small">
+      {% if focus.reading %}
+        <li>Drill <strong>{{ focus.reading.label }}</strong> ({{ focus.reading.accuracy }}%) —
+          <a href="{% url 'ielts:reading_practice' focus.reading.type_slug %}">Start drill</a></li>
+      {% endif %}
+      {% if focus.writing %}
+        <li>Practice <strong>{{ focus.writing.title }}</strong> —
+          <a href="{% url 'ielts:writing' focus.writing.task_id %}">Open Task 1</a></li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-3">
+      <div class="dash-stat-pill h-100">
+        <div class="small text-muted text-uppercase fw-semibold mb-1">Streak</div>
+        <div class="fs-3 fw-bold text-brand">{{ learner_profile.streak_days }}</div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="dash-stat-pill h-100">
+        <div class="small text-muted text-uppercase fw-semibold mb-1">Weekly practice</div>
+        <div class="fs-3 fw-bold text-brand">{{ weekly_minutes }}<span class="fs-6 text-muted">/{{ weekly_goal }}</span></div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="dash-stat-pill h-100">
+        <div class="small text-muted text-uppercase fw-semibold mb-1">Full exam attempts</div>
+        <div class="fs-3 fw-bold text-brand">{{ exam_stats.n|default:0 }}</div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="dash-stat-pill h-100">
+        <div class="small text-muted text-uppercase fw-semibold mb-1">Avg / best</div>
+        <div class="fs-3 fw-bold text-brand">{% if exam_stats.avg_score is not None %}{{ exam_stats.avg_score|floatformat:1 }}{% else %}—{% endif %}<span class="fs-6 text-muted"> / {% if exam_stats.best_score is not None %}{{ exam_stats.best_score }}{% else %}—{% endif %}</span></div>
+      </div>
+    </div>
+  </div>
+
+  {% if last_exam_attempt %}
+    <div class="alert alert-light border mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <span class="small text-muted text-uppercase fw-semibold">Last full test</span>
+        <div class="fw-bold">{{ last_exam_attempt.exam.title }}</div>
+        <span class="small text-muted">{{ last_exam_attempt.score }} correct{% if last_exam_pct is not None %} · {{ last_exam_pct }}%{% endif %}{% if last_exam_band %} · ≈ Band {{ last_exam_band }}{% endif %} · {{ last_exam_attempt.submitted_at|date:'SHORT_DATETIME_FORMAT' }}</span>
+      </div>
+      <a href="{% url 'ielts:exam_result' last_exam_attempt.id %}" class="btn btn-sm btn-cta">View breakdown</a>
+    </div>
+  {% endif %}
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-6">
+      <a href="{% url 'ielts:reading_hub' %}" class="text-decoration-none dash-bento-tile d-block h-100">
+        <span class="dash-suite-label d-inline-block mb-2">Reading</span>
+        <h2 class="h5 fw-bold text-dark">Reading suite</h2>
+        <p class="small text-muted mb-0">Full tests (including expanded academic set), single passages, mixed drills, and question-type practice.</p>
+      </a>
+    </div>
+    <div class="col-md-6">
+      <a href="{% url 'ielts:writing_hub' %}" class="text-decoration-none dash-bento-tile d-block h-100">
+        <span class="dash-suite-label d-inline-block mb-2">Writing</span>
+        <h2 class="h5 fw-bold text-dark">Writing suite</h2>
+        <p class="small text-muted mb-0">Academic Task 1, GT letters, Task 2 essays — timers, autosave, and word counts.</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card-modern mb-4">
+        <h5 class="mb-3">Reading — quick start</h5>
+        {% if reading_exams %}
+          <p class="small text-muted mb-2">Full tests</p>
+          <ul class="list-unstyled mb-4">
+            {% for ex in reading_exams %}
+              <li class="mb-2 d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-2">
+                <span>{{ ex.title }}</span>
+                <a href="{% url 'ielts:reading_exam' ex.id %}" class="btn btn-sm btn-outline-primary">Start</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <div class="d-flex align-items-center justify-content-between border-top pt-3 mt-2">
+          <p class="small text-muted mb-0">Browse all single academic passages.</p>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'ielts:reading_single_passages' %}">Go to Single Passages</a>
+        </div>
+        <div class="mt-3">
+          <a href="{% url 'ielts:reading_practice' 'mixed' %}" class="btn btn-sm btn-cta">Mixed drill</a>
+        </div>
+      </div>
+    </div>
+    <aside class="col-lg-5">
+      <div class="card-modern mb-3">
+        <h6 class="fw-bold">Recent full exam attempts</h6>
+        <ul class="list-unstyled mt-2 small mb-0">
+          {% for a in exam_attempts %}
+            <li class="py-2 border-bottom d-flex justify-content-between align-items-start gap-2">
+              <span>{{ a.exam.title }}</span>
+              <span class="text-nowrap">{{ a.score }} pts · <a href="{% url 'ielts:exam_result' a.id %}">review</a></span>
+            </li>
+          {% empty %}
+            <li class="text-muted">No full exam attempts yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card-modern mb-3">
+        <h6 class="fw-bold">Recent passage attempts</h6>
+        <ul class="list-unstyled mt-2 small mb-0">
+          {% for r in reading_attempts %}
+            <li class="py-2 border-bottom">{{ r.passage.title }}
+              <div class="text-muted">Score: <strong>{{ r.score }}</strong></div>
+            </li>
+          {% empty %}
+            <li class="text-muted">No passage attempts yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card-modern">
+        <h6 class="fw-bold">Recent writing</h6>
+        <ul class="list-unstyled mt-2 small mb-0">
+          {% for a in writing_attempts %}
+            <li class="py-2 border-bottom">{{ a.task.title }}
+              <div class="text-muted">{{ a.updated_at|date:'SHORT_DATETIME_FORMAT' }}{% if a.submitted %} · <a href="{% url 'ielts:writing_review' a.id %}">Review</a>{% endif %}</div>
+            </li>
+          {% empty %}
+            <li class="text-muted">No attempts yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+{% endblock %}

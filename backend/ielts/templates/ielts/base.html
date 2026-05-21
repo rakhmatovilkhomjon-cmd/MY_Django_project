@@ -1,0 +1,82 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Online Reading and Writing — {% block title %}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'ielts/css/style.css' %}?v={% now 'U' %}" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="{% block body_class %}{% endblock %}">
+    <header class="site-header">
+      <nav class="navbar navbar-expand-lg navbar-light container navbar-custom align-items-center py-2">
+        <div class="d-flex align-items-center logo-wrap">
+          <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'ielts:home' %}">
+            <img src="{% static 'ielts/img/logo.svg' %}" alt="" width="36" height="36" class="rounded-1" onerror="this.style.display='none'">
+            <span class="brand-title">Online Reading and Writing</span>
+          </a>
+        </div>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMain">
+          <ul class="navbar-nav mx-auto main-nav-nav my-2 my-lg-0">
+            <li class="nav-item"><a class="nav-link" href="{% url 'ielts:home' %}">Home</a></li>
+            {% if user.is_authenticated %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'ielts:dashboard' %}">Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'ielts:reading_hub' %}">Reading</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'ielts:writing_hub' %}">Writing</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'ielts:analytics' %}">Analytics</a></li>
+            {% endif %}
+          </ul>
+          <div class="d-flex align-items-center gap-2 ms-lg-auto nav-auth">
+            {% if user.is_authenticated %}
+              <span class="text-muted small d-none d-sm-inline">{{ user.username }}</span>
+              <a class="btn btn-sm btn-outline-dark" href="{% url 'ielts:logout' %}">Sign out</a>
+            {% else %}
+              <a class="btn btn-sm btn-outline-dark" href="{% url 'ielts:login' %}">Sign in</a>
+              <a class="btn btn-sm btn-cta-nav px-3" href="{% url 'ielts:register' %}">Sign up</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container main-content">
+      {% if messages %}
+        <div class="mb-3">
+          {% for message in messages %}
+            <div class="alert {% if 'success' in message.tags %}alert-success{% elif 'error' in message.tags %}alert-danger{% elif 'warning' in message.tags %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer mt-5 py-5">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <span class="footer-brand">Online Reading and Writing</span>
+            <p class="small text-muted mb-0 mt-1">Practice reading under time limits and produce timed writing with autosave.</p>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <span class="small text-muted">© {% now "Y" %}</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'ielts/js/ielts.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

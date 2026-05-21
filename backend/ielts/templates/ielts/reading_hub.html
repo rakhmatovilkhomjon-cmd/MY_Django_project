@@ -1,0 +1,91 @@
+{% extends 'ielts/base.html' %}
+{% load static %}
+{% block title %}Reading{% endblock %}
+{% block content %}
+  <section class="hub-hero mb-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <p class="text-uppercase small fw-semibold text-brand-accent mb-2">Reading suite</p>
+        <h1 class="display-6 fw-bold mb-3">Train for long-form reading under time pressure</h1>
+        <p class="lead text-muted mb-0">Choose a full multi-passage exam, a single passage, or isolate one question type to build accuracy before you chain everything together.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <img src="{% static 'ielts/img/hero-illustration.png' %}" alt="" class="hub-hero-img img-fluid" width="280" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </section>
+
+  <div class="card-modern mb-5 border-0 shadow-sm how-it-works">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-4 text-center">
+        <div class="how-icon mx-auto mb-2">1</div>
+        <h6 class="fw-bold">Skim the structure</h6>
+        <p class="small text-muted mb-0">Note headings, visuals, and where names, dates, and opinions appear.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="how-icon mx-auto mb-2">2</div>
+        <h6 class="fw-bold">Match task to strategy</h6>
+        <p class="small text-muted mb-0">YNNG rewards careful wording; matching tasks reward scanning and paragraph control.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="how-icon mx-auto mb-2">3</div>
+        <h6 class="fw-bold">Review and retry</h6>
+        <p class="small text-muted mb-0">Submit to see your score, then drill weak types or retake a full test.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="h4 fw-bold mb-3">Start here</h2>
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="hub-path-card h-100 hub-path-primary">
+        <div class="hub-path-icon">📋</div>
+        <h3 class="h5 fw-bold">Full reading test</h3>
+        <p class="text-muted small">Three randomly selected passages, one clock, one submission — structured like a serious academic reading session.</p>
+        <a href="{% url 'ielts:reading_exam_random' %}" class="btn btn-cta btn-sm mt-2">Start Random Full Test</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="hub-path-card h-100">
+        <div class="hub-path-icon">📄</div>
+        <h3 class="h5 fw-bold">Single passage</h3>
+        <p class="text-muted small">Focus on one text with a suggested {{ passage_timer_minutes|default:20 }}-minute pace.</p>
+        <div class="mt-4">
+          <a href="{% url 'ielts:reading_single_passages' %}" class="btn btn-outline-primary btn-sm w-100">Go to Single Passages</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="hub-path-card h-100">
+        <div class="hub-path-icon">🎯</div>
+        <h3 class="h5 fw-bold">Question types</h3>
+        <p class="text-muted small">Practice one format at a time across every passage in the bank.</p>
+        <a href="#type-practice" class="btn btn-outline-primary btn-sm mt-3">Browse types below</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="h4 fw-bold mb-3" id="type-practice">Question type practice</h2>
+  <div class="practice-mixed-banner mb-4 p-4 rounded-3 border border-2" style="border-color: var(--brand-2) !important; background: linear-gradient(135deg, rgba(13,148,136,0.08), rgba(30,58,95,0.06));">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <span class="fw-bold text-brand d-block">Mixed drill (recommended)</span>
+        <span class="small text-muted">Train task-switching: each visit shuffles up to sixteen questions across every format.</span>
+      </div>
+      <a href="{% url 'ielts:reading_practice' 'mixed' %}" class="btn btn-cta">Start mixed drill</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    {% for slug, title, blurb in question_type_cards %}
+      <div class="col-sm-6 col-lg-4">
+        <a href="{% url 'ielts:reading_practice' type_slug=slug %}" class="text-decoration-none type-tile d-block h-100">
+          <div class="type-tile-inner h-100">
+            <span class="type-tile-badge">{{ title }}</span>
+            <p class="small text-muted mb-0 mt-2">{{ blurb }}</p>
+            <span class="type-tile-cta">Practice →</span>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

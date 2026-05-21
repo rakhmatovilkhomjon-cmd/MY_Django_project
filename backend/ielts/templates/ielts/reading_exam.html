@@ -1,0 +1,486 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Reading Test — {{ exam.title }}{% endblock %}
+{% block extra_head %}
+<meta name="robots" content="noindex">
+<style>
+/* ── Design tokens ──────────────────────────────── */
+:root {
+  --re-bg:      #f4f7fb;
+  --re-surface: #ffffff;
+  --re-border:  #e2e8f0;
+  --re-blue:    #0284c7;
+  --re-blue-lt: #eff6ff;
+  --re-green:   #059669;
+  --re-amber:   #d97706;
+  --re-red:     #dc2626;
+  --re-text:    #0f172a;
+  --re-muted:   #475569;
+  --re-dim:     #94a3b8;
+}
+body { background: var(--re-bg) !important; color: var(--re-text) !important; }
+.main-content { max-width:100% !important; padding:0 !important; }
+
+/* ── Sticky header bar ──────────────────────────── */
+.re-header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--re-border);
+  padding: .85rem 2rem;
+  transition: border-color .3s;
+}
+.re-header.warn { border-bottom-color: var(--re-amber); background: rgba(255,251,235,0.97); }
+.re-header.crit { border-bottom-color: var(--re-red);   background: rgba(255,245,245,0.97); }
+
+.re-exam-kicker { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color: var(--re-blue); }
+.re-exam-title  { font-size:.95rem; font-weight:700; color: var(--re-text); line-height:1.2; }
+.re-meta-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:.75rem; color: var(--re-muted); padding:.25rem .65rem;
+  background:#f1f5f9; border-radius:99px; border:1px solid var(--re-border);
+  font-weight:500;
+}
+
+/* Passage tabs */
+.re-tab-list { display:flex; gap:.5rem; flex-wrap:wrap; }
+.re-tab {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:.4rem 1rem; border-radius:99px; cursor:pointer;
+  font-size:.8rem; font-weight:700; border: 1.5px solid var(--re-border);
+  background:#f8fafc; color: var(--re-muted); transition: all .2s;
+  white-space:nowrap; user-select:none;
+}
+.re-tab:hover  { border-color:#94a3b8; color: var(--re-text); }
+.re-tab.active { border-color: var(--re-blue); background: var(--re-blue-lt); color: var(--re-blue); box-shadow: 0 0 0 3px rgba(2,132,199,.1); }
+.re-tab-dot { width:7px; height:7px; border-radius:50%; background: currentColor; opacity:.6; }
+
+/* Timer */
+.re-timer-wrap { text-align:right; }
+.re-timer-label { font-size:.65rem; text-transform:uppercase; letter-spacing:.07em; color: var(--re-dim); }
+.re-timer-val   { font-family:monospace; font-size:1.65rem; font-weight:800; color: var(--re-text); line-height:1; letter-spacing:-.02em; }
+.re-header.warn .re-timer-val { color: var(--re-amber); }
+.re-header.crit .re-timer-val { color: var(--re-red); animation: re-blink 1s step-end infinite; }
+@keyframes re-blink { 50%{opacity:.3;} }
+.re-progress { height:3px; background:#e9eef5; border-radius:99px; margin-top:5px; width:90px; margin-left:auto; }
+.re-progress-bar { height:100%; border-radius:99px; background: var(--re-blue); transition: width .8s linear; }
+.re-header.warn .re-progress-bar { background: var(--re-amber); }
+.re-header.crit .re-progress-bar { background: var(--re-red); }
+
+/* ── Main 2-column layout ───────────────────────── */
+.re-body { display:grid; grid-template-columns: 1fr 420px; min-height: calc(100vh - 68px); }
+@media(max-width:991px){ .re-body { grid-template-columns:1fr; } }
+
+/* ── Left: passage ──────────────────────────────── */
+.re-passage-col {
+  padding: 2rem 2.5rem;
+  border-right: 1px solid var(--re-border);
+  overflow-y: auto;
+}
+.re-pane { display:none; }
+.re-pane.active { display:block; }
+
+.re-passage-title {
+  font-size:1.4rem; font-weight:800; color: var(--re-text);
+  margin-bottom:.35rem; line-height:1.25;
+}
+.re-passage-source {
+  font-size:.78rem; color: var(--re-dim); font-style:italic;
+  padding:.4rem .9rem; border-left:3px solid var(--re-border);
+  margin-bottom:1.5rem;
+}
+.re-passage-body {
+  font-size:1rem; line-height:1.9; color:#1e293b;
+  font-family:'Georgia', serif;
+}
+.re-passage-body p { margin-bottom:1.1rem; }
+
+/* ── Right: questions panel ─────────────────────── */
+.re-questions-col {
+  position: sticky; top: 68px; height: calc(100vh - 68px);
+  overflow-y: auto; background: #fafcff;
+  border-left: 1px solid var(--re-border);
+}
+.re-q-header {
+  padding:1rem 1.5rem .75rem;
+  background: var(--re-blue-lt);
+  border-bottom: 1px solid #bfdbfe;
+  position: sticky; top:0; z-index:10;
+}
+.re-q-header-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color: var(--re-blue); }
+.re-q-note { font-size:.78rem; color:#2563eb; line-height:1.4; }
+.re-questions-body { padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+
+/* Question card */
+.re-q-card {
+  background: var(--re-surface);
+  border: 1px solid var(--re-border);
+  border-radius:12px;
+  padding:1rem 1.1rem;
+  transition: box-shadow .2s, border-color .2s;
+}
+.re-q-card:hover { border-color:#bae6fd; box-shadow: 0 4px 15px rgba(2,132,199,.07); }
+.re-q-num {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; border-radius:6px;
+  background: var(--re-blue-lt); color: var(--re-blue);
+  font-size:.72rem; font-weight:800; flex-shrink:0; margin-right:8px;
+}
+.re-q-text { font-size:.9rem; font-weight:600; color: var(--re-text); line-height:1.45; }
+.re-q-instruction { font-size:.78rem; color: var(--re-muted); margin:.4rem 0 .6rem; font-style:italic; }
+
+/* Radio / option rows */
+.re-option {
+  display:flex; align-items:flex-start; gap:9px;
+  padding:.45rem .6rem; border-radius:8px; cursor:pointer;
+  transition: background .15s;
+}
+.re-option:hover { background:#f0f9ff; }
+.re-option input[type=radio] { margin-top:2px; accent-color: var(--re-blue); flex-shrink:0; }
+.re-option label { font-size:.86rem; color: var(--re-muted); cursor:pointer; line-height:1.45; }
+.re-option:has(input:checked) { background:#eff6ff; }
+.re-option:has(input:checked) label { color: var(--re-blue); font-weight:600; }
+
+/* Select dropdown */
+.re-select {
+  width:100%; padding:.5rem .75rem; border-radius:8px;
+  border:1.5px solid var(--re-border); background:#fff;
+  color: var(--re-text); font-size:.87rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.re-select:focus { outline:none; border-color: var(--re-blue); box-shadow: 0 0 0 3px rgba(2,132,199,.1); }
+
+/* Text gap input */
+.re-input {
+  width:100%; padding:.5rem .75rem; border-radius:8px;
+  border:1.5px solid var(--re-border); background:#fff;
+  color: var(--re-text); font-size:.87rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.re-input:focus { outline:none; border-color: var(--re-blue); box-shadow: 0 0 0 3px rgba(2,132,199,.1); }
+.re-input::placeholder { color: var(--re-dim); font-style:italic; }
+
+/* ── Progress tracker bar ───────────────────────── */
+.re-q-progress-wrap { padding:.6rem 1.5rem; border-bottom:1px solid var(--re-border); background:#fff; }
+.re-q-progress-label { font-size:.7rem; color: var(--re-muted); margin-bottom:4px; }
+.re-q-progress-track { height:5px; background:#e9eef5; border-radius:99px; }
+.re-q-progress-fill  { height:100%; border-radius:99px; background: var(--re-green); transition:width .3s; }
+
+/* ── Floating submit ────────────────────────────── */
+#re-fab {
+  position:fixed; bottom:1.75rem; right:1.75rem; z-index:999;
+  display:flex; align-items:center; gap:8px;
+  padding:.85rem 1.75rem; border-radius:50px;
+  background: linear-gradient(135deg,#0284c7,#0369a1);
+  color:#fff; font-weight:700; font-size:.93rem;
+  border:none; cursor:pointer;
+  box-shadow: 0 8px 28px rgba(2,132,199,.35);
+  transition: all .25s;
+}
+#re-fab:hover { transform:translateY(-3px); box-shadow:0 14px 38px rgba(2,132,199,.45); }
+
+/* ── Confirm modal ──────────────────────────────── */
+.re-overlay {
+  position:fixed; inset:0; background:rgba(15,23,42,.35);
+  backdrop-filter:blur(5px); z-index:1050;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.re-overlay.open { opacity:1; pointer-events:all; }
+.re-modal {
+  background:#fff; border:1px solid #e2e8f0;
+  border-radius:20px; padding:2.25rem 2.5rem; max-width:420px; width:90%;
+  box-shadow:0 20px 60px rgba(15,23,42,.12);
+  transform:scale(.96) translateY(8px); transition:transform .2s;
+}
+.re-overlay.open .re-modal { transform:scale(1) translateY(0); }
+.re-modal h5 { font-size:1.15rem; font-weight:700; color: var(--re-text); margin-bottom:.4rem; }
+.re-modal p  { color: var(--re-muted); font-size:.9rem; margin-bottom:1.5rem; }
+.re-modal-stat {
+  display:flex; align-items:center; gap:.75rem;
+  padding:.65rem .9rem; background:#f8fafc;
+  border-radius:10px; border:1px solid #e2e8f0; margin-bottom:.75rem;
+}
+.re-modal-stat .ms-ico { font-size:1.1rem; }
+.re-modal-stat .ms-label { font-size:.78rem; color: var(--re-muted); }
+.re-modal-stat .ms-val   { font-size:.9rem;  font-weight:700; color: var(--re-text); }
+.btn-re-confirm {
+  width:100%; padding:.85rem; border-radius:12px; border:none; cursor:pointer;
+  background: linear-gradient(135deg,#0284c7,#0369a1);
+  color:#fff; font-weight:700; font-size:.98rem;
+  box-shadow:0 5px 18px rgba(2,132,199,.3); transition: all .2s;
+}
+.btn-re-confirm:hover { transform:translateY(-2px); box-shadow:0 9px 28px rgba(2,132,199,.4); }
+.btn-re-confirm:disabled { opacity:.6; transform:none; cursor:not-allowed; }
+.btn-re-cancel {
+  width:100%; padding:.75rem; border-radius:12px; margin-top:.65rem;
+  background:transparent; border:1px solid #e2e8f0; color: var(--re-muted);
+  font-weight:600; cursor:pointer; transition: all .2s;
+}
+.btn-re-cancel:hover { border-color:#94a3b8; color: var(--re-text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="re-form">
+{% csrf_token %}
+
+<!-- ── Sticky header ───────────────────────────────── -->
+<header class="re-header" id="re-hdr">
+  <div class="d-flex flex-wrap align-items-center gap-3 justify-content-between">
+
+    <!-- Left: info -->
+    <div>
+      <div class="re-exam-kicker">📖 Full Reading Test</div>
+      <div class="re-exam-title">{{ exam.title }}</div>
+      <div class="d-flex flex-wrap gap-2 mt-1">
+        <span class="re-meta-chip">📄 {{ exam_sections|length }} Passages</span>
+        <span class="re-meta-chip">❓ {{ total_questions }} Questions</span>
+        <span class="re-meta-chip">⏱ {{ exam.time_limit_minutes }} Minutes</span>
+      </div>
+    </div>
+
+    <!-- Centre: passage tabs -->
+    <div class="re-tab-list">
+      {% for row in exam_sections %}
+      <button type="button"
+        class="re-tab {% if forloop.first %}active{% endif %}"
+        id="tab-{{ row.section.id }}"
+        onclick="switchPassage({{ row.section.id }})">
+        <span class="re-tab-dot"></span>
+        Passage {{ row.section.order }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Right: timer -->
+    <div class="re-timer-wrap">
+      <div class="re-timer-label">Time Remaining</div>
+      <div class="re-timer-val" id="re-timer">--:--</div>
+      <div class="re-progress"><div class="re-progress-bar" id="re-bar" style="width:0%"></div></div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ── Body grid ───────────────────────────────────── -->
+<div class="re-body">
+
+  <!-- Left: Reading passage -->
+  <div class="re-passage-col" id="re-passage-area">
+    {% for row in exam_sections %}
+    <div class="re-pane {% if forloop.first %}active{% endif %}" id="pane-{{ row.section.id }}">
+      <div class="re-passage-title">{{ row.section.passage.title }}</div>
+      {% if row.section.passage.source_note %}
+        <div class="re-passage-source">{{ row.section.passage.source_note }}</div>
+      {% endif %}
+      <div class="re-passage-body">{{ row.section.passage.content|linebreaks }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Right: Questions -->
+  <div class="re-questions-col" id="re-q-col">
+
+    <!-- Q header -->
+    <div class="re-q-header">
+      <div class="re-q-header-title" id="re-q-section-label">Passage 1 · Questions</div>
+      <div class="re-q-note">Answer each question. You can navigate between passages freely.</div>
+    </div>
+
+    <!-- Answered progress bar -->
+    <div class="re-q-progress-wrap">
+      <div class="re-q-progress-label">Answered: <span id="re-answered">0</span> / {{ total_questions }}</div>
+      <div class="re-q-progress-track"><div class="re-q-progress-fill" id="re-q-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Question panes (one per passage) -->
+    {% for row in exam_sections %}
+    <div class="re-pane {% if forloop.first %}active{% endif %}" id="q-pane-{{ row.section.id }}">
+      <div class="re-questions-body">
+        {% for q in row.questions %}
+          {% with label=row.q_start|add:forloop.counter0 %}
+          <div class="re-q-card" id="block_q_{{ q.id }}">
+            <div class="d-flex align-items-start mb-1">
+              <span class="re-q-num">{{ label }}</span>
+              <span class="re-q-text">{{ q.text }}</span>
+            </div>
+            {% if q.instruction %}
+              <div class="re-q-instruction">{{ q.instruction }}</div>
+            {% endif %}
+
+            {% if q.question_type == 'mcq' %}
+              {% for opt in q.choices %}
+              <div class="re-option">
+                <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_{{ forloop.counter }}" value="{{ opt }}" onchange="trackAnswered()">
+                <label for="q{{ q.id }}_{{ forloop.counter }}">{{ opt }}</label>
+              </div>
+              {% endfor %}
+
+            {% elif q.question_type == 'ynng' or q.question_type == 'tfng' %}
+              {% if q.question_type == 'ynng' %}
+                {% for opt in "YES,NO,NOT GIVEN" %}
+                {% endfor %}
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_1" value="YES" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_1">YES</label>
+                </div>
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_2" value="NO" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_2">NO</label>
+                </div>
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_3" value="NOT GIVEN" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_3">NOT GIVEN</label>
+                </div>
+              {% else %}
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_1" value="TRUE" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_1">TRUE</label>
+                </div>
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_2" value="FALSE" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_2">FALSE</label>
+                </div>
+                <div class="re-option">
+                  <input type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_3" value="NOT GIVEN" onchange="trackAnswered()">
+                  <label for="q{{ q.id }}_3">NOT GIVEN</label>
+                </div>
+              {% endif %}
+
+            {% elif q.question_type == 'headings' or q.question_type == 'matching_info' or q.question_type == 'match_features' or q.question_type == 'sentence_endings' %}
+              <select name="q_{{ q.id }}" class="re-select mt-1" onchange="trackAnswered()">
+                <option value="">— Select an answer —</option>
+                {% for opt in q.choices %}
+                  <option value="{{ opt }}">{{ opt }}</option>
+                {% endfor %}
+              </select>
+
+            {% else %}
+              <input type="text" name="q_{{ q.id }}" class="re-input mt-1"
+                placeholder="Type your answer here…" onkeyup="trackAnswered()">
+            {% endif %}
+          </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+  </div><!-- /questions col -->
+</div><!-- /body grid -->
+
+</form>
+
+<!-- ── Floating Submit Button ───────────────────── -->
+<button id="re-fab" onclick="openModal()">
+  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  Submit Test
+</button>
+
+<!-- ── Confirm Modal ─────────────────────────────── -->
+<div class="re-overlay" id="re-overlay">
+  <div class="re-modal">
+    <h5>Submit your reading test?</h5>
+    <p>All answers will be saved and evaluated. Unanswered questions will be marked incorrect.</p>
+    <div class="re-modal-stat">
+      <span class="ms-ico">❓</span>
+      <div><div class="ms-label">Total Questions</div><div class="ms-val">{{ total_questions }}</div></div>
+    </div>
+    <div class="re-modal-stat">
+      <span class="ms-ico">✅</span>
+      <div><div class="ms-label">Answered</div><div class="ms-val" id="modal-answered">0</div></div>
+    </div>
+    <div class="re-modal-stat">
+      <span class="ms-ico">⏱</span>
+      <div><div class="ms-label">Time Remaining</div><div class="ms-val" id="modal-timer">—</div></div>
+    </div>
+    <button class="btn-re-confirm" id="re-confirm-btn" onclick="doSubmit()">✓ Confirm & Submit</button>
+    <button class="btn-re-cancel" onclick="closeModal()">Cancel — keep answering</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  const totalSec = {{ exam.time_limit_minutes }} * 60;
+  const totalQ   = {{ total_questions }};
+  let timeLeft   = totalSec;
+  let timedOut   = false;
+
+  const hdr    = document.getElementById('re-hdr');
+  const timerEl= document.getElementById('re-timer');
+  const barEl  = document.getElementById('re-bar');
+  const form   = document.getElementById('re-form');
+
+  /* ── Passage switching ──────────────────── */
+  const sectionIds = [{% for row in exam_sections %}{{ row.section.id }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const sectionLabels = [{% for row in exam_sections %}"Passage {{ row.section.order }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+
+  window.switchPassage = function(id){
+    sectionIds.forEach((sid, i) => {
+      const pane  = document.getElementById('pane-'  + sid);
+      const qpane = document.getElementById('q-pane-'+ sid);
+      const tab   = document.getElementById('tab-'   + sid);
+      const isActive = sid === id;
+      if(pane)  pane.classList.toggle('active', isActive);
+      if(qpane) qpane.classList.toggle('active', isActive);
+      if(tab)   tab.classList.toggle('active', isActive);
+      if(isActive){
+        document.getElementById('re-q-section-label').textContent = sectionLabels[i] + ' · Questions';
+        document.getElementById('re-passage-area').scrollTop = 0;
+        document.getElementById('re-q-col').scrollTop = 0;
+      }
+    });
+  };
+
+  /* ── Answer progress ────────────────────── */
+  window.trackAnswered = function(){
+    let answered = 0;
+    form.querySelectorAll('input[type=radio]:checked, select').forEach(el => {
+      if(el.tagName === 'SELECT'){ if(el.value) answered++; }
+      else { answered++; }
+    });
+    form.querySelectorAll('input[type=text]').forEach(el => { if(el.value.trim()) answered++; });
+    const pct = Math.round((answered / totalQ) * 100);
+    document.getElementById('re-answered').textContent = answered;
+    document.getElementById('re-q-fill').style.width = pct + '%';
+    document.getElementById('modal-answered').textContent = answered;
+  };
+
+  /* ── Timer ──────────────────────────────── */
+  function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  timerEl.textContent = fmt(timeLeft);
+  const tick = setInterval(()=>{
+    timeLeft = Math.max(0, timeLeft - 1);
+    const pct = Math.min(100, Math.round(((totalSec - timeLeft) / totalSec) * 100));
+    timerEl.textContent = fmt(timeLeft);
+    barEl.style.width = pct + '%';
+    document.getElementById('modal-timer').textContent = fmt(timeLeft);
+    hdr.classList.toggle('warn', timeLeft <= 300 && timeLeft > 60);
+    hdr.classList.toggle('crit', timeLeft <= 60);
+    if(timeLeft <= 0){ clearInterval(tick); timedOut = true; form.requestSubmit(); }
+  }, 1000);
+
+  /* ── Modal ──────────────────────────────── */
+  window.openModal = function(){
+    if(timedOut) return;
+    document.getElementById('modal-timer').textContent = fmt(timeLeft);
+    trackAnswered();
+    document.getElementById('re-overlay').classList.add('open');
+  };
+  window.closeModal = function(){
+    document.getElementById('re-overlay').classList.remove('open');
+  };
+  window.doSubmit = function(){
+    const btn = document.getElementById('re-confirm-btn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    form.requestSubmit();
+  };
+  document.getElementById('re-overlay').addEventListener('click', e => { if(e.target.id === 're-overlay') closeModal(); });
+
+  // Init progress
+  trackAnswered();
+})();
+</script>
+{% endblock %}

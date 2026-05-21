@@ -1,0 +1,1184 @@
+{% extends 'ielts/base.html' %}
+{% load static %}
+{% block title %}Engineered for Band 8.0+{% endblock %}
+
+{% block body_class %}home-page-light{% endblock %}
+
+{% block extra_head %}
+<style>
+/* --- NEXUS ENGINE STYLES (Light Blue Theme) --- */
+:root {
+  --nexus-bg: #f8fafc;
+  --nexus-surface: rgba(255, 255, 255, 0.6);
+  --nexus-border: rgba(14, 165, 233, 0.2);
+  --nexus-primary: #0284c7;  /* Deep Sky Blue */
+  --nexus-secondary: #0ea5e9; /* Light Sky Blue */
+  --nexus-text: #0f172a;
+  --nexus-muted: #475569;
+}
+
+body.home-page-light {
+  background-color: var(--nexus-bg);
+  color: var(--nexus-text);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(224, 242, 254, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(240, 253, 250, 1) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.home-page-light .site-header {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--nexus-border);
+}
+
+.home-page-light .brand-title, .home-page-light .navbar-custom .nav-link {
+  color: #0f172a !important;
+}
+
+.home-page-light .navbar-custom .nav-link:hover {
+  color: var(--nexus-primary) !important;
+}
+
+.home-page-light .btn-outline-dark {
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.home-page-light .btn-outline-dark:hover {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.4);
+}
+
+.home-page-light .main-content {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.home-page-light .site-footer {
+  background-color: #ffffff;
+  border-top: 1px solid var(--nexus-border);
+  color: var(--nexus-muted);
+}
+.home-page-light .footer-brand {
+  color: var(--nexus-primary);
+}
+
+/* HERO SECTION */
+.nexus-hero {
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6rem 1rem;
+}
+
+.nexus-bg-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80vw;
+  height: 80vw;
+  max-width: 1000px;
+  max-height: 1000px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(56, 189, 248, 0.1) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
+  animation: pulse-glow 8s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+.nexus-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  width: 100%;
+}
+
+.nexus-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 1.2rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 99px;
+  color: #0284c7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.nexus-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: #0284c7;
+  border-radius: 50%;
+  margin-right: 10px;
+  box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.nexus-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nexus-subtitle {
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: #334155;
+  margin-bottom: 3.5rem;
+  line-height: 1.6;
+  max-width: 700px;
+  margin-inline: auto;
+}
+
+.nexus-btn-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #fff !important;
+  border: none;
+  padding: 1.1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(2, 132, 199, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.nexus-btn-primary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(2, 132, 199, 0.35);
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.nexus-btn-secondary {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a !important;
+  padding: 1.1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.nexus-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+/* FEATURES SHOWCASE */
+.nexus-features {
+  padding: 6rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+.glass-card {
+  background: var(--nexus-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid #ffffff;
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  transform: translateY(-10px);
+  border-color: #bae6fd;
+  box-shadow: 0 30px 60px rgba(14, 165, 233, 0.1), 0 0 30px rgba(14, 165, 233, 0.05);
+}
+
+.glass-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
+}
+
+.icon-blue {
+  color: #0284c7;
+  box-shadow: inset 0 0 20px rgba(2, 132, 199, 0.1);
+}
+
+.icon-emerald {
+  color: #059669;
+  box-shadow: inset 0 0 20px rgba(5, 150, 105, 0.1);
+  background: #ecfdf5;
+  border-color: #d1fae5;
+}
+
+.icon-indigo {
+  color: #4f46e5;
+  box-shadow: inset 0 0 20px rgba(79, 70, 229, 0.1);
+  background: #eef2ff;
+  border-color: #e0e7ff;
+}
+
+.glass-card-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.glass-card-text {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+.nexus-link {
+  color: #0284c7;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.nexus-link svg {
+  margin-left: 8px;
+  transition: transform 0.2s;
+}
+
+.nexus-link:hover {
+  color: #0369a1;
+}
+
+.nexus-link:hover svg {
+  transform: translateX(4px);
+}
+
+.interactive-mockup {
+  margin-top: auto;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 2px 10px rgba(15,23,42,0.02);
+}
+
+.mockup-pulse-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.mockup-pulse-fill {
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+  animation: loading-bar 3s ease-in-out infinite alternate;
+}
+
+.mockup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mockup-tag {
+  padding: 0.3rem 0.8rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.mockup-tag.active {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+@keyframes loading-bar {
+  0% { width: 30%; }
+  100% { width: 85%; }
+}
+
+/* FOCUS BANNER */
+.nexus-focus-banner {
+  background: linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%);
+  padding: 8rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.focus-glowing-timer {
+  font-family: monospace;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+  padding: 1.5rem 3.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  margin-bottom: 2.5rem;
+  letter-spacing: -0.05em;
+}
+
+/* --- PREMIUM PRECISION ACCELERATOR SIMULATOR --- */
+.sim-dashboard-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  margin-inline: auto;
+  padding: 2rem 0 8rem;
+  z-index: 10;
+}
+
+/* Ambient glow nodes behind the mockup */
+.sim-glow {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  z-index: -1;
+  pointer-events: none;
+}
+.glow-blue {
+  background: #0ea5e9;
+  top: -10%;
+  left: 10%;
+}
+.glow-indigo {
+  background: #6366f1;
+  bottom: -10%;
+  right: 10%;
+}
+
+/* Main browser/IDE frame */
+.sim-browser-chrome {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08), 
+              0 0 0 1px rgba(14, 165, 233, 0.04);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.4s ease;
+}
+.sim-browser-chrome:hover {
+  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: 0 40px 80px rgba(14, 165, 233, 0.12);
+}
+
+.sim-browser-header {
+  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sim-dots {
+  display: flex;
+  gap: 6px;
+}
+.sim-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.sim-dot.close { background: #ff5f56; }
+.sim-dot.minimize { background: #ffbd2e; }
+.sim-dot.expand { background: #27c93f; }
+
+.sim-browser-title {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sim-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0284c7;
+  letter-spacing: 0.05em;
+}
+.sim-status-dot {
+  width: 6px;
+  height: 6px;
+  background: #0ea5e9;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #0ea5e9;
+  animation: blink 2s infinite;
+}
+
+.sim-browser-body {
+  padding: 1.5rem;
+  min-height: 220px;
+}
+
+/* Simulated workspace text editor pane */
+.sim-workspace-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.sim-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.08);
+  padding-bottom: 0.75rem;
+}
+.sim-panel-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.sim-panel-kicker {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f0f9ff;
+  color: #0284c7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+}
+
+.sim-editor-mock {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.sim-editor-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.sim-line-num {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  width: 1.25rem;
+  text-align: right;
+  user-select: none;
+}
+.sim-text-default {
+  color: #334155;
+}
+
+/* Tooltip highlights */
+.sim-text-c2-wrap, .sim-text-c1-wrap, .sim-text-link-wrap {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+.sim-text-c2, .sim-text-c1, .sim-text-link {
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+.sim-text-c2 {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+  border-bottom: 2px solid #6366f1;
+}
+.sim-text-c1 {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border-bottom: 2px solid #10b981;
+}
+.sim-text-link {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  border-bottom: 2px solid #0ea5e9;
+}
+
+.sim-tooltip {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: 0 10px 20px rgba(15,23,42,0.15);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+.sim-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+}
+.sim-text-c2-wrap:hover .sim-tooltip,
+.sim-text-c1-wrap:hover .sim-tooltip,
+.sim-text-link-wrap:hover .sim-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sim-panel-footer {
+  border-top: 1px solid rgba(14, 165, 233, 0.08);
+  padding-top: 0.75rem;
+  display: flex;
+  gap: 1.5rem;
+}
+.sim-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+.sim-meta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.sim-meta-dot.blue { background: #0284c7; }
+.sim-meta-dot.green { background: #10b981; }
+
+/* Floating metrics cards */
+.sim-floating-card {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06),
+              0 2px 8px rgba(15, 23, 42, 0.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+}
+.sim-floating-card:hover {
+  transform: scale(1.04) translateY(-4px) !important;
+  border-color: #bae6fd;
+  box-shadow: 0 25px 45px rgba(14, 165, 233, 0.15),
+              0 0 15px rgba(14, 165, 233, 0.05);
+}
+
+/* 1. Graph trend card styling */
+.sim-card-graph {
+  width: 220px;
+  bottom: -80px;
+  left: 10px;
+  padding: 1rem;
+}
+.sim-card-header-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.sim-trend-badge {
+  background: #ecfdf5;
+  color: #059669;
+  padding: 2px 6px;
+  border-radius: 99px;
+  font-size: 0.6rem;
+}
+.sim-graph-wrap {
+  margin: 0.5rem 0;
+  overflow: visible;
+}
+.sim-svg-graph {
+  width: 100%;
+  height: auto;
+}
+.sim-svg-path {
+  stroke-dasharray: 250;
+  stroke-dashoffset: 250;
+  animation: drawGraph 3s ease-in-out forwards;
+}
+@keyframes drawGraph {
+  to { stroke-dashoffset: 0; }
+}
+
+.sim-svg-pulse {
+  transform-origin: 170px 15px;
+  animation: svgPulse 2s infinite;
+}
+@keyframes svgPulse {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.sim-graph-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(15, 23, 42, 0.05);
+  padding-top: 0.5rem;
+  font-size: 0.75rem;
+}
+.sim-score-label {
+  color: #475569;
+  font-weight: 500;
+}
+.sim-score-val {
+  color: #0284c7;
+  font-weight: 700;
+}
+
+/* 2. Typology Card styling */
+.sim-card-drills {
+  width: 220px;
+  right: 10px;
+  bottom: -80px;
+  padding: 1rem;
+}
+.sim-status-active {
+  color: #0284c7;
+  font-weight: 700;
+}
+.sim-drills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.sim-drill-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sim-drill-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+}
+.sim-drill-pct {
+  color: #475569;
+}
+.sim-progress-bar {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.sim-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7, #0ea5e9);
+  border-radius: 99px;
+}
+.sim-progress-fill.indigo {
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+}
+
+/* 3. Timer Card styling */
+.sim-card-timer {
+  width: 140px;
+  right: 50%;
+  transform: translateX(50%);
+  bottom: -130px;
+  padding: 0.75rem;
+}
+.sim-timer-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #b45309;
+}
+.sim-timer-time {
+  font-family: monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2px 0;
+  letter-spacing: -0.02em;
+}
+.sim-timer-bar {
+  height: 4px;
+  background: #fef3c7;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.sim-timer-fill {
+  height: 100%;
+  width: 60%;
+  background: #d97706;
+  border-radius: 99px;
+  animation: timerProgress 20s linear infinite alternate;
+}
+@keyframes timerProgress {
+  from { width: 85%; }
+  to { width: 15%; }
+}
+
+/* Parallax floating animations */
+.float-slow-up {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+.float-medium-down {
+  animation: floatMedium 6s ease-in-out infinite;
+}
+.float-fast-up {
+  animation: floatFast 7s ease-in-out infinite;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes floatMedium {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+@keyframes floatFast {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991px) {
+  .sim-dashboard-wrapper {
+    margin-top: 3rem;
+    padding-bottom: 7rem;
+  }
+}
+@media (max-width: 575px) {
+  .sim-dashboard-wrapper {
+    padding-bottom: 8rem;
+  }
+  .sim-floating-card {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100% !important;
+    margin-top: 0.75rem;
+  }
+  .sim-floating-card:hover {
+    transform: scale(1.02) !important;
+  }
+  .sim-timer-time {
+    font-size: 1.15rem;
+  }
+  .sim-panel-title {
+    font-size: 0.8rem;
+  }
+  .sim-editor-line {
+    font-size: 0.85rem;
+  }
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Section 1: Split hero -->
+<section class="home-hero-split nexus-hero">
+    <div class="nexus-bg-glow"></div>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 home-hero-copy">
+        <div class="nexus-badge">
+          <span class="nexus-badge-dot"></span> IELTS Practice Platform
+        </div>
+        <h1 class="nexus-title home-hero-title">
+          Train smarter for<br>
+          <span class="text-gradient">Band 8.0+</span>
+        </h1>
+        <p class="nexus-subtitle home-hero-lead">
+          Real Task 1 charts, timed reading & writing, and analytics that show which question types hold you back.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          {% if user.is_authenticated %}
+            <a href="{% url 'ielts:dashboard' %}" class="nexus-btn-primary">Open dashboard</a>
+            <a href="{% url 'ielts:analytics' %}" class="nexus-btn-secondary">View analytics</a>
+          {% else %}
+            <a href="{% url 'ielts:register' %}" class="nexus-btn-primary">Create free account</a>
+            <a href="{% url 'ielts:login' %}" class="nexus-btn-secondary">Sign in</a>
+          {% endif %}
+        </div>
+        <div class="home-ticker" aria-hidden="true">
+          <div class="home-ticker-track">
+            <span>Reading · 12 question types</span><span>·</span><span>Task 1 charts</span><span>·</span>
+            <span>Full writing tests</span><span>·</span><span>Band tracking</span><span>·</span>
+            <span>Weak-type drills</span><span>·</span><span>Reading · 12 question types</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 home-hero-visual">
+        <div class="sim-dashboard-wrapper">
+          <!-- Ambient Glow backdrops -->
+          <div class="sim-glow glow-blue"></div>
+          <div class="sim-glow glow-indigo"></div>
+
+          <!-- Browser Window Chrome -->
+          <div class="sim-browser-chrome">
+            <div class="sim-browser-header">
+              <div class="sim-dots">
+                <span class="sim-dot close"></span>
+                <span class="sim-dot minimize"></span>
+                <span class="sim-dot expand"></span>
+              </div>
+              <div class="sim-browser-title">
+                <span class="sim-title-icon">⚡</span> ielts-precision-engine.io
+              </div>
+              <div class="sim-status">
+                <span class="sim-status-dot"></span> LIVE DRILLS
+              </div>
+            </div>
+            
+            <div class="sim-browser-body">
+              <!-- Grid Layout for simulated modules -->
+              
+              <!-- 1. The Main Writing Workspace Simulation -->
+              <div class="sim-workspace-panel">
+                <div class="sim-panel-header">
+                  <span class="sim-panel-title">Active IELTS Writing Studio (Task 2)</span>
+                  <span class="sim-panel-kicker">Band 8.5 target</span>
+                </div>
+                <div class="sim-editor-mock">
+                  <div class="sim-editor-line">
+                    <span class="sim-line-num">01</span>
+                    <span class="sim-text-default">The demographic shifts</span>
+                    <span class="sim-text-c2-wrap">
+                      <span class="sim-text-c2">substantiated</span>
+                      <span class="sim-tooltip">C2 Vocabulary (Academic)</span>
+                    </span>
+                    <span class="sim-text-default">a</span>
+                  </div>
+                  <div class="sim-editor-line">
+                    <span class="sim-line-num">02</span>
+                    <span class="sim-text-c1-wrap">
+                      <span class="sim-text-c1">drastic transition</span>
+                      <span class="sim-tooltip">C1 Collocation (Formal)</span>
+                    </span>
+                    <span class="sim-text-default">in global infrastructure,</span>
+                  </div>
+                  <div class="sim-editor-line">
+                    <span class="sim-line-num">03</span>
+                    <span class="sim-text-default">thereby</span>
+                    <span class="sim-text-link-wrap">
+                      <span class="sim-text-link">accelerating</span>
+                      <span class="sim-tooltip">Precise Active Participle</span>
+                    </span>
+                    <span class="sim-text-default">socioeconomic growth.</span>
+                  </div>
+                </div>
+                <div class="sim-panel-footer">
+                  <div class="sim-meta-item">
+                    <span class="sim-meta-dot blue"></span> 264 / 250 words
+                  </div>
+                  <div class="sim-meta-item">
+                    <span class="sim-meta-dot green"></span> AI Lexical: 8.5
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Floating Card A: SVG Analytics Trend (Target Band 8.5 progress) -->
+          <div class="sim-floating-card sim-card-graph float-slow-up">
+            <div class="sim-card-header-mini">
+              <span>BAND PROGRESSION</span>
+              <span class="sim-trend-badge">+1.5 Band</span>
+            </div>
+            <div class="sim-graph-wrap">
+              <!-- Gradient-filled responsive SVG graph -->
+              <svg viewBox="0 0 200 80" class="sim-svg-graph">
+                <defs>
+                  <linearGradient id="graphGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#0284c7" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Area path -->
+                <path d="M 10 70 Q 50 60 90 40 T 170 15 L 170 70 Z" fill="url(#graphGrad)" />
+                <!-- Line path -->
+                <path d="M 10 70 Q 50 60 90 40 T 170 15" fill="none" stroke="#0284c7" stroke-width="3" stroke-linecap="round" class="sim-svg-path" />
+                <!-- Indicator circles -->
+                <circle cx="170" cy="15" r="4" fill="#0ea5e9" />
+                <circle cx="170" cy="15" r="8" fill="none" stroke="#0ea5e9" stroke-width="1.5" class="sim-svg-pulse" />
+              </svg>
+            </div>
+            <div class="sim-graph-footer">
+              <span class="sim-score-label">Current Projection:</span>
+              <span class="sim-score-val">Band 8.2</span>
+            </div>
+          </div>
+
+          <!-- 3. Floating Card B: Typology Drilling Ring (Float card B) -->
+          <div class="sim-floating-card sim-card-drills float-medium-down">
+            <div class="sim-card-header-mini">
+              <span>TYPOLOGY DRILLS</span>
+              <span class="sim-status-active">94% Mastery</span>
+            </div>
+            <div class="sim-drills-list">
+              <div class="sim-drill-item">
+                <div class="sim-drill-info">
+                  <span class="sim-drill-name">YN / NG typologies</span>
+                  <span class="sim-drill-pct">94%</span>
+                </div>
+                <div class="sim-progress-bar">
+                  <div class="sim-progress-fill" style="width: 94%"></div>
+                </div>
+              </div>
+              <div class="sim-drill-item">
+                <div class="sim-drill-info">
+                  <span class="sim-drill-name">Matching Headings</span>
+                  <span class="sim-drill-pct">88%</span>
+                </div>
+                <div class="sim-progress-bar">
+                  <div class="sim-progress-fill indigo" style="width: 88%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Floating Card C: Real-Time Timer (Float card C) -->
+          <div class="sim-floating-card sim-card-timer float-fast-up">
+            <div class="sim-timer-header">
+              <span class="sim-timer-icon">⏳</span>
+              <span class="sim-timer-lbl">TIMED SESSION</span>
+            </div>
+            <div class="sim-timer-time">24:59</div>
+            <div class="sim-timer-bar">
+              <div class="sim-timer-fill"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: Glassmorphism Features -->
+<section class="nexus-features">
+  <div class="container">
+    <div class="row g-4">
+      
+      <!-- Block 1: The Writing Studio -->
+      <div class="col-lg-4">
+        <div class="glass-card d-flex flex-column">
+          <div class="glass-icon-wrapper icon-blue">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </div>
+          <h3 class="glass-card-title">The Writing Studio</h3>
+          <p class="glass-card-text">A distraction-free terminal with real-time lexical analysis. Tracks word count dynamically against the 150/250 requirement while a relentless 60-minute clock simulates actual exam pressure.</p>
+          
+          <div class="interactive-mockup mb-4">
+            <div class="d-flex justify-content-between mb-2" style="font-family: monospace; font-size: 0.8rem; color: #64748b;">
+              <span style="color: #ef4444;">42:15</span>
+              <span>Words: <span style="color: #059669;">264</span> / 250</span>
+            </div>
+            <div class="mockup-pulse-bar">
+              <div class="mockup-pulse-fill"></div>
+            </div>
+            <div class="mockup-pulse-bar" style="width: 80%; opacity: 0.5;"></div>
+            <div class="mockup-pulse-bar" style="width: 90%; opacity: 0.3;"></div>
+          </div>
+          
+          <a href="{% url 'ielts:writing_hub' %}" class="nexus-link mt-auto">
+            Initialize Writing Suite
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Block 2: Reading Simulator -->
+      <div class="col-lg-4">
+        <div class="glass-card d-flex flex-column">
+          <div class="glass-icon-wrapper icon-emerald">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          </div>
+          <h3 class="glass-card-title">Reading Simulator</h3>
+          <p class="glass-card-text">Stop practicing blindly. Isolate the exact question typologies that destroy your score and drill them until they become second nature.</p>
+          
+          <div class="interactive-mockup mb-4">
+            <div class="mockup-tags">
+              <span class="mockup-tag">Y / N / NG</span>
+              <span class="mockup-tag">Headings</span>
+              <span class="mockup-tag active">Multiple Choice</span>
+              <span class="mockup-tag">Summary</span>
+            </div>
+          </div>
+
+          <a href="{% url 'ielts:reading_hub' %}" class="nexus-link mt-auto">
+            Deploy Reading Drills
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Block 3: Micro-Analytics -->
+      <div class="col-lg-4">
+        <div class="glass-card d-flex flex-column">
+          <div class="glass-icon-wrapper icon-indigo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          </div>
+          <h3 class="glass-card-title">Micro-Analytics</h3>
+          <p class="glass-card-text">Every attempt is logged. Every error is tracked. Watch your baseline shift upward with comprehensive data visualization.</p>
+          
+          <div class="interactive-mockup mb-4 d-flex align-items-end" style="height: 100px; gap: 8px;">
+            <div style="width: 20%; background: rgba(99, 102, 241, 0.2); height: 30%; border-radius: 4px 4px 0 0;"></div>
+            <div style="width: 20%; background: rgba(99, 102, 241, 0.4); height: 50%; border-radius: 4px 4px 0 0;"></div>
+            <div style="width: 20%; background: rgba(99, 102, 241, 0.6); height: 70%; border-radius: 4px 4px 0 0;"></div>
+            <div style="width: 20%; background: rgba(99, 102, 241, 0.8); height: 90%; border-radius: 4px 4px 0 0; box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);"></div>
+          </div>
+
+          <a href="{% url 'ielts:analytics' %}" class="nexus-link mt-auto">
+            View Analytics
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Exam-day path -->
+<section class="home-path-section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="home-path-heading">Your exam-day path</h2>
+      <p class="text-muted mx-auto" style="max-width:560px">Four focused steps from discovery to full simulation — no gimmicks, just structured practice.</p>
+    </div>
+    <div class="home-steps-rail mb-5">
+      <a href="{% if user.is_authenticated %}{% url 'ielts:dashboard' %}{% else %}{% url 'ielts:register' %}{% endif %}" class="home-step-card">
+        <span class="home-step-num">1</span>
+        <strong>Discover</strong>
+        <span class="small text-muted">Set your target band & track streaks</span>
+      </a>
+      <a href="{% if user.is_authenticated %}{% url 'ielts:reading_practice' 'mixed' %}{% else %}{% url 'ielts:register' %}{% endif %}" class="home-step-card">
+        <span class="home-step-num">2</span>
+        <strong>Drill weak types</strong>
+        <span class="small text-muted">YN/NG, headings, completion & more</span>
+      </a>
+      <a href="{% if user.is_authenticated %}{% url 'ielts:reading_exam_random' %}{% else %}{% url 'ielts:register' %}{% endif %}" class="home-step-card">
+        <span class="home-step-num">3</span>
+        <strong>Full reading test</strong>
+        <span class="small text-muted">60 minutes · three passages</span>
+      </a>
+      <a href="{% if user.is_authenticated %}{% url 'ielts:writing_exam_random' %}{% else %}{% url 'ielts:register' %}{% endif %}" class="home-step-card">
+        <span class="home-step-num">4</span>
+        <strong>Full writing test</strong>
+        <span class="small text-muted">Task 1 chart + Task 2 essay</span>
+      </a>
+    </div>
+    <div class="home-bento">
+      <div class="home-bento-card large">
+        <span class="home-bento-label">Reading</span>
+        <p class="mb-0 small">“Researchers have long debated whether climate patterns in the North Atlantic…”</p>
+        <span class="badge bg-light text-dark mt-2">Passage 2 · Q14–26</span>
+      </div>
+      <div class="home-bento-card">
+        <span class="home-bento-label">Writing</span>
+        <p class="mb-0 fw-bold text-brand">264 <span class="fw-normal text-muted">/ 250 words</span></p>
+        <div class="home-bento-bar mt-2"><span style="width:92%"></span></div>
+      <div class="home-bento-card accent">
+        <span class="home-bento-label">Band estimate</span>
+        <p class="display-6 fw-bold mb-0">7.5</p>
+        <p class="small mb-0 opacity-75">Reading · last full test</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

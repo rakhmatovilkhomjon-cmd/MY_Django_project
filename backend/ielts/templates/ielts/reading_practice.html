@@ -1,0 +1,82 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Practice — {{ practice_type }}{% endblock %}
+{% block content %}
+  <div id="main-header" class="mb-4">
+    <a href="{% url 'ielts:reading_hub' %}" class="small text-decoration-none">← Reading hub</a>
+    <h1 class="h3 fw-bold mt-2">{% if practice_type == 'mixed' %}Mixed drill{% else %}Question type practice{% endif %}</h1>
+    <p class="text-muted">{% if practice_type == 'mixed' %}Shuffled questions across all formats (new set each time you open this page).{% else %}Type: <span class="fw-semibold text-dark">{{ practice_type }}</span>{% endif %}</p>
+  </div>
+
+  {% if result %}
+    <div class="alert alert-success">
+      <strong>Score:</strong> {{ result.score }} / {{ result.total }}
+    </div>
+  {% endif %}
+
+  <div id="questions-view">
+    <form method="post" class="card-modern p-4">
+      {% csrf_token %}
+      {% regroup questions by passage as passage_groups %}
+      {% for group in passage_groups %}
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+          <h5 class="h6 text-uppercase text-muted mb-0">{{ group.grouper.title }}</h5>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="showPassage('passage-{{ forloop.counter }}')">Look at the text</button>
+        </div>
+        
+        <div class="questions-list">
+        {% for q in group.list %}
+          {% include "ielts/partials/question_field.html" with question=q label=forloop.counter %}
+        {% endfor %}
+        </div>
+      {% endfor %}
+      <div class="d-grid gap-2 mt-4">
+        <button type="submit" class="btn btn-cta">Check answers</button>
+      </div>
+    </form>
+  </div>
+
+  {% regroup questions by passage as passage_groups %}
+  {% for group in passage_groups %}
+  <div id="passage-{{ forloop.counter }}" class="passage-view d-none">
+    <div class="mb-3">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showQuestions()">← Return to questions</button>
+    </div>
+    <div class="card-modern reading-passage reading-passage-text">
+      <h3 class="mb-4">{{ group.grouper.title }}</h3>
+      {% if group.grouper.source_note %}
+        <p class="small passage-source-note mb-3">{{ group.grouper.source_note }}</p>
+      {% endif %}
+      {{ group.grouper.content|linebreaks }}
+    </div>
+  </div>
+  {% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showPassage(passageId) {
+    document.getElementById('main-header').classList.add('d-none');
+    document.getElementById('questions-view').classList.add('d-none');
+    
+    // Hide all passages
+    document.querySelectorAll('.passage-view').forEach(function(el) {
+      el.classList.add('d-none');
+    });
+    
+    // Show specific passage
+    document.getElementById(passageId).classList.remove('d-none');
+    window.scrollTo(0, 0);
+  }
+
+  function showQuestions() {
+    document.getElementById('main-header').classList.remove('d-none');
+    document.getElementById('questions-view').classList.remove('d-none');
+    
+    // Hide all passages
+    document.querySelectorAll('.passage-view').forEach(function(el) {
+      el.classList.add('d-none');
+    });
+  }
+</script>
+{% endblock %}

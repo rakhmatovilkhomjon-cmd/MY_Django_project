@@ -1,0 +1,61 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Writing{% endblock %}
+{% block content %}
+  <section class="mb-5 writing-hub-hero">
+    <p class="text-uppercase small fw-semibold text-brand-accent mb-2">Writing suite</p>
+    <h1 class="display-6 fw-bold mb-3 writing-hub-title">Practice like the real exam</h1>
+    <p class="lead text-muted writing-hub-lead">Single tasks use their own timers. The <strong>full writing test</strong> gives you <strong>one 60-minute clock</strong> for Task 1 and Task 2 together: you complete Task 1 first, then move on — if time runs out, both parts submit (Task 2 can be empty). Autosave runs in the background.</p>
+  </section>
+
+  {% if writing_papers or True %}
+    <section class="mb-5">
+      <h2 class="writing-fulltest-heading">Full writing test (60 minutes)</h2>
+      <p class="text-muted small mb-4">Matches real IELTS timing: one continuous session. Task 1 appears first; after you submit it, Task 2 opens while the same timer keeps counting down.</p>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="hub-path-card hub-path-primary h-100 d-flex flex-column">
+            <span class="badge bg-light text-dark align-self-start mb-2">60 min · Task 1 + Task 2</span>
+            <h3 class="h5 fw-bold text-white">Random Full Test</h3>
+            <p class="text-white-50 small flex-grow-1">One randomly selected Task 1 and one randomly selected Task 2, combined into a single 60-minute session.</p>
+            <a href="{% url 'ielts:writing_exam_random' %}" class="btn btn-light mt-auto fw-bold" style="color: var(--brand-1);">Start Random Test</a>
+          </div>
+        </div>
+        {% for paper in writing_papers %}
+          <div class="col-md-6">
+            <div class="hub-path-card hub-fulltest-card h-100 d-flex flex-column">
+              <span class="badge writing-fulltest-badge align-self-start mb-2">{{ paper.time_limit_minutes }} min · Task 1 + Task 2</span>
+              <h3 class="h5 fw-bold">{{ paper.title }}</h3>
+              <p class="text-muted small flex-grow-1 mb-1"><span class="text-dark fw-semibold">Task 1:</span> {{ paper.task_one.title }}</p>
+              <p class="text-muted small flex-grow-1 mb-3"><span class="text-dark fw-semibold">Task 2:</span> {{ paper.task_two.title }}</p>
+              <a href="{% url 'ielts:writing_full' paper.id %}" class="btn btn-cta mt-auto">Start full test</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    <hr class="writing-hub-divider my-5">
+  {% endif %}
+
+  <h2 class="writing-kind-heading mb-3" style="margin-top:0">Single-task practice</h2>
+  <p class="text-muted small mb-4">Shorter timers per task — use these to focus on one question type.</p>
+
+  {% regroup writing_tasks by task_kind as task_groups %}
+  {% for group in task_groups %}
+    <h2 class="writing-kind-heading">{{ group.list.0.get_task_kind_display }}</h2>
+    <div class="row g-4 mb-2">
+      {% for t in group.list %}
+        <div class="col-md-6">
+          <div class="hub-path-card h-100 d-flex flex-column">
+            <span class="badge bg-light text-dark align-self-start mb-2">{{ t.time_limit_minutes }} min</span>
+            {% if t.visual.kind %}<span class="badge bg-info text-dark align-self-start mb-2 ms-1">Includes chart</span>{% endif %}
+            <h3 class="h5 fw-bold">{{ t.title }}</h3>
+            <p class="text-muted small flex-grow-1">{{ t.prompt|truncatewords:36 }}</p>
+            <a href="{% url 'ielts:writing' t.id %}" class="btn btn-cta mt-3">Open writing space</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% empty %}
+    <p class="text-muted">No writing tasks configured.</p>
+  {% endfor %}
+{% endblock %}

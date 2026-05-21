@@ -1,0 +1,108 @@
+{% extends 'ielts/base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+  <div class="mb-4">
+    <h1 class="h3 fw-bold mb-1">Progress analytics</h1>
+    <p class="text-muted mb-0">Reading trends, question-type accuracy, and where to focus next.</p>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="card-modern h-100">
+        <h5 class="fw-bold mb-3">Full test scores over time</h5>
+        {% if trend %}
+          <canvas id="trend-chart" height="120"></canvas>
+          {{ trend|json_script:"analytics-trend-data" }}
+        {% else %}
+          <p class="text-muted mb-0">Complete a full reading test to see your trend line.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-modern h-100">
+        <h5 class="fw-bold mb-3">Focus on weak types</h5>
+        {% if weak_types %}
+          <ul class="list-unstyled mb-0">
+            {% for w in weak_types %}
+              <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span class="small">{{ w.label }}</span>
+                <span class="d-flex align-items-center gap-2">
+                  <span class="badge bg-light text-dark">{{ w.accuracy }}%</span>
+                  <a href="{% url 'ielts:reading_practice' w.type %}" class="btn btn-sm btn-outline-primary">Drill</a>
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted mb-0">Answer more questions to unlock personalised drills.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card-modern">
+    <h5 class="fw-bold mb-3">Accuracy by question type</h5>
+    {% if type_stats %}
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr><th>Type</th><th>Correct</th><th>Total</th><th>Accuracy</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for s in type_stats %}
+              <tr>
+                <td>{{ s.label }}</td>
+                <td>{{ s.correct }}</td>
+                <td>{{ s.total }}</td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height:8px; min-width:80px">
+                      <div class="progress-bar" style="width:{{ s.accuracy }}%; background:var(--brand-1)"></div>
+                    </div>
+                    <span class="small text-muted">{{ s.accuracy }}%</span>
+                  </div>
+                </td>
+                <td><a href="{% url 'ielts:reading_practice' s.type %}" class="small">Practice</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">No reading data yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block extra_js %}
+{% if trend %}
+<script>
+(function(){
+  const raw = JSON.parse(document.getElementById('analytics-trend-data').textContent);
+  const ctx = document.getElementById('trend-chart');
+  if (!ctx || typeof Chart === 'undefined') return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: raw.map(p => p.date),
+      datasets: [{
+        label: 'Score %',
+        data: raw.map(p => p.pct),
+        borderColor: '#0284c7',
+        backgroundColor: 'rgba(2,132,199,0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { min: 0, max: 100 } }
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}
